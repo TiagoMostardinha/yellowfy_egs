@@ -17,7 +17,7 @@ docker run --name mongo -d mongo:latest
 ```go
 
 // after getting the dependcies of go it will reconstruct go.mod to be more readable
-go mod vendors
+go mod vendor
 go mod tidy
 
 // compiles the project into an executable
