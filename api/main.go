@@ -1,12 +1,10 @@
 package main
 
 import (
-	//"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
-	"net/http"
+	//"net/http"
 	"os"
 )
 
@@ -22,36 +20,27 @@ func main() {
 	if port == "" {
 		log.Fatal("PORT is not found on the enviroment")
 	}
-
-	// configures router with the requirements
-	router := chi.NewRouter()
-
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://*", "https://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
-
-	// Creating a Router for version v0
-	v0Router := chi.NewRouter()
-	v0Router.Get("/healthz", handlerReadiness)
-	v0Router.Get("/error",handlerError)
-
-	router.Mount("/v0", v0Router)
-
-	// configures server to handle requests and response
-	server := &http.Server{
-		Handler: router,
-		Addr:    ":" + port,
+	
+	// gets DB_URI where our database will be
+	dbURI := os.Getenv("DB_URI")
+	if dbURI == "" {
+		log.Fatal("DB_URI is not found on the enviroment")
 	}
-	log.Printf("Server starting on port %v", port)
 
-	// starting the server to accept requests and send response
-	err = server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// create a new Router
+	router := gin.Default()
+
+	// create version 0 for router
+	v0Router := router.Group("/v0")
+	
+	// all endpoints present on the api
+	v0Router.GET("/healthz", handleReadiness)
+	v0Router.GET("/error", handleError)
+	v0Router.GET("/", handleGetAnnouncemnts)
+	v0Router.GET("/:id", handleGetAnnouncementsByID)
+	v0Router.POST("/", handleCreateAnnouncement)
+	v0Router.DELETE("/:id", handleDeleteAnnouncement)
+	v0Router.PUT("/:id", handleUpdateAnnouncemnt)
+
+	router.Run(":8080")
 }
