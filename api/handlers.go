@@ -1,31 +1,17 @@
 package main
 
 import (
-	"errors"
-	"github.com/gin-gonic/gin"
+	//"errors"
 	"log"
 	"net/http"
+
+	. "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/models"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Coordinates struct {
-	Lat  float64 `json:"lat"`
-	Long float64 `json:"long"`
-}
-
-type Announcement struct {
-	Id           string      `json:"id"`
-	UserID       string      `json:"userID"`
-	Category     string      `json:"category"`
-	Description  string      `json:"description"`
-	Localization Coordinates `json:"localization"`
-}
-
-var annoucemnts []Announcement = []Announcement{
-	{"adgadg", "1s5d2", "carpenter", "looking for a job", Coordinates{-1.554, 2.546}},
-	{"2f1sfa", "fas3f", "painter", "looking for a wall to paint", Coordinates{-3.454, 2.126}},
-}
-
-// for user check that api is running 
+// for user check that api is running
 func handleReadiness(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, struct{}{})
 }
@@ -35,21 +21,33 @@ func handleError(c *gin.Context) {
 }
 
 func handleGetAnnouncemnts(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, annoucemnts)
+	announcements, err := AnnouncementDB.GetAllAnnouncements()
+	if err != nil {
+		log.Printf("couldnt fetch announcements")
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, announcements)
 }
 
 func getAnnouncementByID(userID string) (*Announcement, error) {
-	for i, annoucemnt := range annoucemnts {
-		if annoucemnt.UserID == userID {
-			return &annoucemnts[i], nil
-		}
+	objUserID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("announcement not found")
+
+	announcement, err := AnnouncementDB.GetAnnouncement(objUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &announcement, nil
 }
 
 func handleGetAnnouncementsByID(c *gin.Context) {
 	id := c.Param("id")
 	announcement, err := getAnnouncementByID(id)
+
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
 		return
@@ -64,23 +62,28 @@ func handleCreateAnnouncement(c *gin.Context) {
 		return
 	}
 
-	annoucemnts = append(annoucemnts, newAnnouncement)
+	newAnnouncement.Id = primitive.NewObjectID()
+
+	if err := AnnouncementDB.CreateAnnouncement(newAnnouncement); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "couldnt create announcement")
+		return
+	}
+
 	c.IndentedJSON(http.StatusCreated, newAnnouncement)
 }
 
 func handleDeleteAnnouncement(c *gin.Context) {
 	id := c.Param("id")
-	announcement, err := getAnnouncementByID(id)
+
+	objUserID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Printf("there is no announcement with userID %v", err)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
 		return
 	}
 
-	for i, announ := range annoucemnts {
-		if announcement.UserID == announ.UserID {
-			annoucemnts = append(annoucemnts[:i], annoucemnts[i+1:]...)
-			break
-		}
+	if err := AnnouncementDB.DeleteAnnouncement(objUserID); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "couldnt delete announcement")
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Announcement deleted successfully"})
@@ -88,11 +91,6 @@ func handleDeleteAnnouncement(c *gin.Context) {
 
 func handleUpdateAnnouncemnt(c *gin.Context) {
 	id := c.Param("id")
-	announcement, err := getAnnouncementByID(id)
-	if err != nil {
-		log.Printf("there is no announcement with userID %v", err)
-		return
-	}
 
 	var newAnnouncement Announcement
 
@@ -101,11 +99,16 @@ func handleUpdateAnnouncemnt(c *gin.Context) {
 		return
 	}
 
-	for i, announ := range annoucemnts {
-		if announcement.UserID == announ.UserID {
-			annoucemnts[i] = newAnnouncement
-			break
-		}
+	objUserID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
+		return
+
+	}
+
+	if err := AnnouncementDB.UpdateAnnouncement(objUserID, newAnnouncement); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "couldnt update announcement")
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Announcement updated successfully"})

@@ -10,7 +10,7 @@
 ## How to run
 - Start and Run mongoDB container, by default mongoDB is on port 27017.
 ```bash
-docker run --name mongo -d mongo:latest
+docker run -d --name mongodb -v $PWD/mongo/data:/data/db -p 27017:27017 mongo:latest
 ```
 
 - Building api and getting go dependencies.

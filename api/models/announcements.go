@@ -1,14 +1,16 @@
-package common
+package models
+
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Coordinates struct {
-	Lat  float64 `json:"lat"`
-	Long float64 `json:"long"`
+	Lat  float64 `json:"lat" bson:"lat"`
+	Long float64 `json:"long" bson:"long"`
 }
 
 type Announcement struct {
-	Id           string      `json:"id"`
-	UserID       string      `json:"userID"`
-	Category     string      `json:"category"`
-	Description  string      `json:"description"`
-	Localization Coordinates `json:"localization"`
+	Id           primitive.ObjectID `bson:"_id"`
+	UserID       string             `json:"userID" bson:"userID"`
+	Category     string             `json:"category" bson:"category"`
+	Description  string             `json:"description" bson:"description"`
+	Localization Coordinates        `json:"localization" bson:"localization"`
 }
