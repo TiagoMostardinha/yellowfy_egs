@@ -62,14 +62,14 @@ func handleCreateAnnouncement(c *gin.Context) {
 		return
 	}
 
-	newAnnouncement.Id = primitive.NewObjectID()
+	createdAnnouncement, err := AnnouncementDB.CreateAnnouncement(newAnnouncement)
 
-	if err := AnnouncementDB.CreateAnnouncement(newAnnouncement); err != nil {
+	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, "couldnt create announcement")
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, newAnnouncement)
+	c.IndentedJSON(http.StatusCreated, createdAnnouncement)
 }
 
 func handleDeleteAnnouncement(c *gin.Context) {
@@ -106,10 +106,11 @@ func handleUpdateAnnouncemnt(c *gin.Context) {
 
 	}
 
-	if err := AnnouncementDB.UpdateAnnouncement(objUserID, newAnnouncement); err != nil {
+	updatedAnnouncement, err := AnnouncementDB.UpdateAnnouncement(objUserID, newAnnouncement)
+	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, "couldnt update announcement")
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "Announcement updated successfully"})
+	c.IndentedJSON(http.StatusOK, updatedAnnouncement)
 }

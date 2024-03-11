@@ -93,20 +93,22 @@ func (db *Database) GetAnnouncement(id primitive.ObjectID) (Announcement, error)
 	return announcement, nil
 }
 
-func (db *Database) CreateAnnouncement(newAnnouncement Announcement) error {
+func (db *Database) CreateAnnouncement(newAnnouncement Announcement) (*Announcement, error) {
 	err := db.Ping()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	collection := db.collection()
 
+	newAnnouncement.Id = primitive.NewObjectID()
+
 	_, err = collection.InsertOne(context.TODO(), newAnnouncement)
 	if err != nil {
-		return errors.New("couldn't insert document to the database")
+		return nil, errors.New("couldn't insert document to the database")
 	}
 
-	return nil
+	return &newAnnouncement, nil
 }
 
 func (db *Database) DeleteAnnouncement(id primitive.ObjectID) error {
@@ -128,10 +130,10 @@ func (db *Database) DeleteAnnouncement(id primitive.ObjectID) error {
 	return nil
 }
 
-func (db *Database) UpdateAnnouncement(id primitive.ObjectID, updateAnnouncement Announcement) error {
+func (db *Database) UpdateAnnouncement(id primitive.ObjectID, updateAnnouncement Announcement) (*Announcement, error) {
 	err := db.Ping()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	collection := db.collection()
@@ -143,8 +145,13 @@ func (db *Database) UpdateAnnouncement(id primitive.ObjectID, updateAnnouncement
 	)
 
 	if err != nil {
-		return errors.New("couldn't update the document from the database")
+		return nil, errors.New("couldn't update the document from the database")
 	}
 
-	return nil
+	updated, err := db.GetAnnouncement(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updated, nil
 }
