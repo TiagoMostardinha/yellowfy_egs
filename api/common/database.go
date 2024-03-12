@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"errors"
+	"math"
 
 	. "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/models"
 
@@ -71,6 +72,36 @@ func (db *Database) GetAllAnnouncements() ([]Announcement, error) {
 	}
 
 	return announcements, nil
+}
+
+func geoDistance(center, point Coordinates) float64 {
+	centerLatRad := math.Pi * center.Lat / 180   // Convert latitude to radians
+	centerLongRad := math.Pi * center.Long / 180 // Convert longitude to radians
+	pointLatRad := math.Pi * point.Lat / 180     // Convert latitude to radians
+	pointLongRad := math.Pi * point.Long / 180   // Convert longitude to radians
+
+	distance := math.Acos(
+		math.Sin(centerLatRad)*math.Sin(pointLatRad) +
+			math.Cos(centerLatRad)*math.Cos(pointLatRad)*
+				math.Cos(centerLongRad-pointLongRad),
+	)
+
+	return distance * 6371
+}
+
+func (db *Database) GetAnnouncementsByRadius(center Coordinates, radius float64) ([]Announcement, error) {
+	announcements, err := db.GetAllAnnouncements()
+	if err != nil {
+		return nil, err
+	}
+
+	var announcementsInRadius []Announcement
+	for _, announcement := range announcements {
+		if geoDistance(center, announcement.Location) <= radius {
+			announcementsInRadius = append(announcementsInRadius, announcement)
+		}
+	}
+	return announcementsInRadius, nil
 }
 
 func (db *Database) GetAnnouncement(id primitive.ObjectID) (Announcement, error) {

@@ -4,6 +4,7 @@ import (
 	//"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	. "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/models"
 
@@ -21,7 +22,39 @@ func handleError(c *gin.Context) {
 }
 
 func handleGetAnnouncemnts(c *gin.Context) {
-	announcements, err := AnnouncementDB.GetAllAnnouncements()
+	radiusQuery := c.Query("radius")
+	latQuery := c.Query("lat")
+	longQuery := c.Query("long")
+
+	var announcements []Announcement
+	var err error
+
+	if radiusQuery != "" && latQuery != "" && longQuery != "" {
+		radius, err := strconv.ParseFloat(radiusQuery, 64)
+		if err != nil {
+			log.Printf("couldnt parse radius")
+			return
+		}
+
+		lat, err := strconv.ParseFloat(latQuery, 64)
+		if err != nil {
+			log.Printf("couldnt parse radius")
+			return
+		}
+		long, err := strconv.ParseFloat(longQuery, 64)
+		if err != nil {
+			log.Printf("couldnt parse radius")
+			return
+		}
+
+		announcements, err = AnnouncementDB.GetAnnouncementsByRadius(
+			Coordinates{Lat: lat, Long: long},
+			radius,
+		)
+	} else {
+		announcements, err = AnnouncementDB.GetAllAnnouncements()
+	}
+
 	if err != nil {
 		log.Printf("couldnt fetch announcements")
 		return
