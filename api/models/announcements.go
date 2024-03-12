@@ -8,9 +8,9 @@ type Coordinates struct {
 }
 
 type Announcement struct {
-	Id           primitive.ObjectID `bson:"_id"`
-	UserID       string             `json:"userID" bson:"userID"`
-	Category     string             `json:"category" bson:"category"`
-	Description  string             `json:"description" bson:"description"`
-	Localization Coordinates        `json:"localization" bson:"localization"`
+	Id          primitive.ObjectID `bson:"_id"`
+	UserID      string             `json:"userID" bson:"userID"`
+	Category    string             `json:"category" bson:"category"`
+	Description string             `json:"description" bson:"description"`
+	Location    Coordinates        `json:"location" bson:"location"`
 }
