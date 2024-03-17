@@ -3,22 +3,38 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
 from models import Appointment
 from typing import List, Optional
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
 # Dummy data storage
 appointments = []
 
+# Helper function to check for overlapping appointments
+def check_overlapping_appointments(new_appointment: Appointment):
+    new_start_time = datetime.strptime(new_appointment.date_time, "%Y-%m-%d %H:%M")
+    new_end_time = new_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+    
+    for existing_appointment in appointments:
+        existing_start_time = datetime.strptime(existing_appointment.date_time, "%Y-%m-%d %H:%M")
+        existing_end_time = existing_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+        
+        if (new_appointment.contractor_id == existing_appointment.contractor_id and
+            ((new_start_time >= existing_start_time and new_start_time < existing_end_time) or
+             (existing_start_time >= new_start_time and existing_start_time < new_end_time))):
+            raise HTTPException(status_code=400, detail="Appointment time slot is not available")
+
 # CRUD operations
 @app.post("/appointments/")
 def create_appointment(appointment: Appointment):
+    check_overlapping_appointments(appointment)
     appointment.id = len(appointments) + 1
     appointments.append(appointment)
     return appointment
 
 @app.get("/appointments/", response_model=List[Appointment])
 def read_appointments(skip: int = 0, limit: int = 10):
-    return appointments[skip:skip + limit]
+    return appointments[skip : skip + limit]
 
 @app.get("/appointments/{appointment_id}", response_model=Appointment)
 def read_appointment(appointment_id: int):
