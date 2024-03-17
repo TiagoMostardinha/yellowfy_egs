@@ -1,0 +1,297 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the API for the announcements service in GO with Gin Framework.",
+        "title": "Announcements service API",
+        "contact": {},
+        "version": "0.1"
+    },
+    "host": "localhost:8080",
+    "basePath": "/v0",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Get all announcements from the database or filter by location and radius",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Get all announcements",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "radius in meters",
+                        "name": "radius",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "latitude",
+                        "name": "lat",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "longitude",
+                        "name": "long",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Announcement"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new announcement in the database",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Create a new announcement",
+                "parameters": [
+                    {
+                        "description": "announcement object",
+                        "name": "announcement",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Announcement"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Announcement"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/healthz": {
+            "get": {
+                "description": "Checks if the API is running.",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/{id}": {
+            "get": {
+                "description": "Get announcement by ID from the database",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Get announcement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "announcement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Announcement"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update announcement by ID from the database",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Update announcement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "announcement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "announcement object",
+                        "name": "announcement",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Announcement"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Announcement"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete announcement by ID from the database",
+                "produces": [
+                    "applcation/json"
+                ],
+                "tags": [
+                    "Announcements"
+                ],
+                "summary": "Delete announcement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "announcement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIMessage"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.APIError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.APIMessage": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Announcement": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/models.Coordinates"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Coordinates": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "long": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
