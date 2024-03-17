@@ -64,7 +64,7 @@ func handleGetAnnouncemnts(c *gin.Context) {
 			radius,
 		)
 	} else {
-		if radiusQuery == "" && latQuery != "" && longQuery != "" {
+		if radiusQuery == "" && latQuery == "" && longQuery == "" {
 			announcements, err = AnnouncementDB.GetAllAnnouncements()
 		} else {
 			c.IndentedJSON(
