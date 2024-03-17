@@ -2,6 +2,7 @@ package main
 
 import (
 	//"errors"
+
 	"log"
 	"net/http"
 	"strconv"
@@ -17,10 +18,6 @@ func handleReadiness(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, struct{}{})
 }
 
-func handleError(c *gin.Context) {
-	c.IndentedJSON(http.StatusInternalServerError, "Somthing went wrong")
-}
-
 func handleGetAnnouncemnts(c *gin.Context) {
 	radiusQuery := c.Query("radius")
 	latQuery := c.Query("lat")
@@ -32,18 +29,33 @@ func handleGetAnnouncemnts(c *gin.Context) {
 	if radiusQuery != "" && latQuery != "" && longQuery != "" {
 		radius, err := strconv.ParseFloat(radiusQuery, 64)
 		if err != nil {
-			log.Printf("couldnt parse radius")
+			c.IndentedJSON(
+				http.StatusBadRequest,
+				APIError{
+					StatusCode: http.StatusBadRequest,
+					Message:    "couldn't parse radius",
+				})
 			return
 		}
 
 		lat, err := strconv.ParseFloat(latQuery, 64)
 		if err != nil {
-			log.Printf("couldnt parse radius")
+			c.IndentedJSON(
+				http.StatusBadRequest,
+				APIError{
+					StatusCode: http.StatusBadRequest,
+					Message:    "couldn't parse latitute",
+				})
 			return
 		}
 		long, err := strconv.ParseFloat(longQuery, 64)
 		if err != nil {
-			log.Printf("couldnt parse radius")
+			c.IndentedJSON(
+				http.StatusBadRequest,
+				APIError{
+					StatusCode: http.StatusBadRequest,
+					Message:    "couldn't parse longitute",
+				})
 			return
 		}
 
@@ -52,11 +64,27 @@ func handleGetAnnouncemnts(c *gin.Context) {
 			radius,
 		)
 	} else {
-		announcements, err = AnnouncementDB.GetAllAnnouncements()
+		if radiusQuery == "" && latQuery != "" && longQuery != "" {
+			announcements, err = AnnouncementDB.GetAllAnnouncements()
+		} else {
+			c.IndentedJSON(
+				http.StatusBadRequest,
+				APIError{
+					StatusCode: http.StatusBadRequest,
+					Message:    "must have all or none of the following query parameters: radius, lat, long",
+				})
+		}
+
 	}
 
 	if err != nil {
-		log.Printf("couldnt fetch announcements")
+		c.IndentedJSON(
+			http.StatusServiceUnavailable,
+			APIError{
+				StatusCode: http.StatusServiceUnavailable,
+				Message:    "couldn't get announcements",
+			})
+		log.Print(err)
 		return
 	}
 
@@ -65,7 +93,7 @@ func handleGetAnnouncemnts(c *gin.Context) {
 
 func getAnnouncementByID(userID string) (*Announcement, error) {
 	objUserID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
+	if err != nil || len(userID) != 24 {
 		return nil, err
 	}
 
@@ -82,7 +110,12 @@ func handleGetAnnouncementsByID(c *gin.Context) {
 	announcement, err := getAnnouncementByID(id)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
+		c.IndentedJSON(
+			http.StatusNotFound,
+			APIError{
+				StatusCode: http.StatusNotFound,
+				Message:    "invalid id for announcement",
+			})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, announcement)
@@ -92,13 +125,25 @@ func handleCreateAnnouncement(c *gin.Context) {
 	var newAnnouncement Announcement
 
 	if err := c.BindJSON(&newAnnouncement); err != nil {
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			APIError{
+				StatusCode: http.StatusBadRequest,
+				Message:    "invalid JSON announcement format in body",
+			})
 		return
 	}
 
 	createdAnnouncement, err := AnnouncementDB.CreateAnnouncement(newAnnouncement)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "couldnt create announcement")
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			APIError{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "couldnt create announcement",
+			})
+		log.Print(err)
 		return
 	}
 
@@ -109,17 +154,32 @@ func handleDeleteAnnouncement(c *gin.Context) {
 	id := c.Param("id")
 
 	objUserID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
+	if err != nil || len(id) != 24 {
+		c.IndentedJSON(
+			http.StatusNotFound,
+			APIError{
+				StatusCode: http.StatusNotFound,
+				Message:    "invalid id for announcement",
+			})
 		return
 	}
 
 	if err := AnnouncementDB.DeleteAnnouncement(objUserID); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "couldnt delete announcement")
+		c.IndentedJSON(
+			http.StatusNotFound,
+			APIError{
+				StatusCode: http.StatusNotFound,
+				Message:    "announcement not found",
+			})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "Announcement deleted successfully"})
+	c.IndentedJSON(
+		http.StatusOK,
+		APIMessage{
+			StatusCode: http.StatusOK,
+			Message:    "announcement deleted successfully",
+		})
 }
 
 func handleUpdateAnnouncemnt(c *gin.Context) {
@@ -128,20 +188,37 @@ func handleUpdateAnnouncemnt(c *gin.Context) {
 	var newAnnouncement Announcement
 
 	if err := c.BindJSON(&newAnnouncement); err != nil {
-		// logging
+		c.IndentedJSON(
+			http.StatusBadRequest,
+			APIError{
+				StatusCode: http.StatusBadRequest,
+				Message:    "invalid JSON announcement format in body",
+			})
+		log.Print(err)
 		return
 	}
 
 	objUserID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "announcement not found"})
+		c.IndentedJSON(
+			http.StatusNotFound,
+			APIError{
+				StatusCode: http.StatusNotFound,
+				Message:    "invalid id for announcement",
+			})
 		return
 
 	}
 
 	updatedAnnouncement, err := AnnouncementDB.UpdateAnnouncement(objUserID, newAnnouncement)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "couldnt update announcement")
+		c.IndentedJSON(
+			http.StatusInternalServerError,
+			APIError{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "couldn't update announcement",
+			})
+		log.Print(err)
 		return
 	}
 

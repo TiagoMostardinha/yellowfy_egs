@@ -7,9 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	//"net/http"
 	"os"
 )
+
+//TODO: create openapi documentation -> https://www.youtube.com/watch?v=0b_N4y8_9iI
 
 var AnnouncementDB Database
 
@@ -52,12 +53,11 @@ func main() {
 
 	// all endpoints present on the api
 	v0Router.GET("/healthz", handleReadiness)
-	v0Router.GET("/error", handleError)
 	v0Router.GET("/", handleGetAnnouncemnts)
 	v0Router.GET("/:id", handleGetAnnouncementsByID)
 	v0Router.POST("/", handleCreateAnnouncement)
 	v0Router.DELETE("/:id", handleDeleteAnnouncement)
 	v0Router.PUT("/:id", handleUpdateAnnouncemnt)
 
-	router.Run(":8080")
+	router.Run(":" + port)
 }
