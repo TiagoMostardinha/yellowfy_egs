@@ -6,6 +6,8 @@ import (
 	. "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/common"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	ginSwagger "github.com/swaggo/files"
+	swaggerFiles "github.com/swaggo/gin-swagger"
 
 	"os"
 )
@@ -47,6 +49,8 @@ func main() {
 
 	// create a new Router
 	router := gin.Default()
+	// add swagger documentation
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// create version 0 for router
 	v0Router := router.Group("/v0")
