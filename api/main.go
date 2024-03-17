@@ -4,16 +4,21 @@ import (
 	"log"
 
 	. "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/common"
+	_ "github.com/TiagoMostardinha/yellowfy_egs/tree/announcements/api/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	ginSwagger "github.com/swaggo/files"
-	swaggerFiles "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"os"
 )
 
-//TODO: create openapi documentation -> https://www.youtube.com/watch?v=0b_N4y8_9iI
+// @title	Announcements service API
+// @version	0.0.1
+// @description	This is the API for the announcements service in GO with Gin Framework.
 
+// @host	localhost:8080
+// @BasePath	/
 var AnnouncementDB Database
 
 func main() {
@@ -49,8 +54,6 @@ func main() {
 
 	// create a new Router
 	router := gin.Default()
-	// add swagger documentation
-	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// create version 0 for router
 	v0Router := router.Group("/v0")
@@ -62,6 +65,9 @@ func main() {
 	v0Router.POST("/", handleCreateAnnouncement)
 	v0Router.DELETE("/:id", handleDeleteAnnouncement)
 	v0Router.PUT("/:id", handleUpdateAnnouncemnt)
+
+	// adds swagger documentation
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(":" + port)
 }
