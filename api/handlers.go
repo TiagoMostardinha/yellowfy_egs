@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"errors"
-
 	"log"
 	"net/http"
 	"strconv"
@@ -14,10 +12,29 @@ import (
 )
 
 // for user check that api is running
+// HealthCheck		godoc
+// @Summary			Health check
+// @Description		Checks if the API is running.
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200
+// @Router			/healthz [get]
 func handleReadiness(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, struct{}{})
 }
 
+// GetAnnouncements	godoc
+// @Summary			Get all announcements
+// @Description		Get all announcements from the database or filter by location and radius
+// @Param			radius	query	float64	false	"radius in meters"
+// @Param			lat		query	float64	false	"latitude"
+// @Param			long	query	float64	false	"longitude"
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200 {array} Announcement
+// @Failure			400 {object} APIError
+// @Failure			503 {object} APIError
+// @Router			/ [get]
 func handleGetAnnouncemnts(c *gin.Context) {
 	radiusQuery := c.Query("radius")
 	latQuery := c.Query("lat")
@@ -73,6 +90,7 @@ func handleGetAnnouncemnts(c *gin.Context) {
 					StatusCode: http.StatusBadRequest,
 					Message:    "must have all or none of the following query parameters: radius, lat, long",
 				})
+			return
 		}
 
 	}
@@ -105,6 +123,15 @@ func getAnnouncementByID(userID string) (*Announcement, error) {
 	return &announcement, nil
 }
 
+// GetAnnouncementByID	godoc
+// @Summary			Get announcement by ID
+// @Description		Get announcement by ID from the database
+// @Param			id	path	string	true	"announcement ID"
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200 {object} Announcement
+// @Failure			404 {object} APIError
+// @Router			/{id} [get]
 func handleGetAnnouncementsByID(c *gin.Context) {
 	id := c.Param("id")
 	announcement, err := getAnnouncementByID(id)
@@ -121,6 +148,16 @@ func handleGetAnnouncementsByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, announcement)
 }
 
+// CreateAnnouncement	godoc
+// @Summary			Create a new announcement
+// @Description		Create a new announcement in the database
+// @Param			announcement	body	Announcement	true	"announcement object"
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200 {object} Announcement
+// @Failure			400 {object} APIError
+// @Failure			500 {object} APIError
+// @Router			/ [post]
 func handleCreateAnnouncement(c *gin.Context) {
 	var newAnnouncement Announcement
 
@@ -150,6 +187,15 @@ func handleCreateAnnouncement(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, createdAnnouncement)
 }
 
+// DeleteAnnouncement	godoc
+// @Summary			Delete announcement by ID
+// @Description		Delete announcement by ID from the database
+// @Param			id	path	string	true	"announcement ID"
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200 {object} APIMessage
+// @Failure			404 {object} APIError
+// @Router			/{id} [delete]
 func handleDeleteAnnouncement(c *gin.Context) {
 	id := c.Param("id")
 
@@ -182,6 +228,17 @@ func handleDeleteAnnouncement(c *gin.Context) {
 		})
 }
 
+// UpdateAnnouncemnt	godoc
+// @Summary			Update announcement by ID
+// @Description		Update announcement by ID from the database
+// @Param			id	path	string	true	"announcement ID"
+// @Param			announcement	body	Announcement	true	"announcement object"
+// @Produce			applcation/json
+// @Tags			Announcements
+// @Success			200 {object} Announcement
+// @Failure			404 {object} APIError
+// @Failure			500 {object} APIError
+// @Router			/{id} [put]
 func handleUpdateAnnouncemnt(c *gin.Context) {
 	id := c.Param("id")
 
