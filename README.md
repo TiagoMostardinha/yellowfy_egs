@@ -1,11 +1,15 @@
 # yellowfy_egs
+
+---
+---
+# Announcements API
 ## Description
 - The announcements API will be responsible to manage the annoucements stored in the database and how they will interact with other services.
 - Based on a REST API model, it will only handle requests and responses with JSON content.
 - **Diagram:** ![view diagram](readme/view_diagram.jpg)
 
 ## Documentation
-- The REST API is in api/ directory, so any source code manipulation and operations must be in that same directory
+- The REST API is in announcements/api/ directory, so any source code manipulation and operations must be in that same directory
 
 ## How to run
 - Start and Run mongoDB container, by default mongoDB is on port 27017.
@@ -28,3 +32,6 @@ go build
 ```go
 ./api
 ```
+- To access the documentation of announcements API go to the browser and access http://localhost:8080/docs
+---
+---
