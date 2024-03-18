@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/announcements.dart'; // Importing AnnouncementsPage for navigation
-import 'package:yellowfy/main.dart'; // Importing LoginPage for navigation
-import 'package:yellowfy/map.dart'; // Importing MapPage for navigation
-import 'package:yellowfy/booking.dart'; // Importing BookingPage for navigation
+import 'package:yellowfy/views/announcements.dart'; // Importing AnnouncementsPage for navigation
+import 'package:yellowfy/views/main.dart'; // Importing LoginPage for navigation
+import 'package:yellowfy/views/map.dart'; // Importing MapPage for navigation
+import 'package:yellowfy/views/booking.dart'; // Importing BookingPage for navigation
 
 class ContactInfoPage extends StatelessWidget {
   final String contactInfo;
@@ -117,8 +117,7 @@ class ContactInfoPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => const AnnouncemntsPage()),
             );
           } else if (index == 2) {
             Navigator.push(

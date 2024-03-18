@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/announcements.dart';
-import 'package:yellowfy/main.dart';
+import 'package:yellowfy/views/announcements.dart';
+import 'package:yellowfy/views/main.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -39,7 +39,7 @@ class SearchPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => const AnnouncemntsPage()),
             );
           } else if (index == 2) {
             Navigator.push(

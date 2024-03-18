@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'announcements.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -69,7 +70,7 @@ class LoginPage extends StatelessWidget {
             padding: EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Name',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -78,7 +79,7 @@ class LoginPage extends StatelessWidget {
             padding: EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: 'PhoneNumber',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -170,8 +171,7 @@ class LoginPage extends StatelessWidget {
           if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => const AnnouncemntsPage()),
             );
           }
         },

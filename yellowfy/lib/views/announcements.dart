@@ -1,10 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/main.dart';
-import 'package:yellowfy/map.dart';
-import 'package:yellowfy/contactspage.dart';
+import 'package:yellowfy/views/main.dart';
+import 'package:yellowfy/views/map.dart';
+import 'package:http/http.dart' as http;
+import 'package:yellowfy/models/post.dart';
+import 'dart:convert';
 
-class AnnouncementsPage extends StatelessWidget {
-  const AnnouncementsPage({super.key});
+class AnnouncemntsPage extends StatefulWidget {
+  const AnnouncemntsPage({Key? key}) : super(key: key);
+
+  @override
+  _AnnouncementsPageState createState() => _AnnouncementsPageState();
+}
+
+class _AnnouncementsPageState extends State<AnnouncemntsPage> {
+  late Future<List<Announcement>> _announcementsFuture;
+  List<Announcement>? announcements;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAnnouncements();
+  }
+
+  Future<List<Announcement>> _fetchAnnouncements() async {
+    final response = await http.get(
+      Uri.parse('https://yellowfy.herokuapp.com/announcements'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse
+          .map((announcement) => Announcement.fromJson(announcement))
+          .toList();
+    } else {
+      throw Exception('Failed to load announcements');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +47,28 @@ class AnnouncementsPage extends StatelessWidget {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
-      body: ListView(
-        scrollDirection: Axis.vertical, // Vertical scrolling
-        children: [
-          _buildAnnouncementCard(
-            name: 'John Doe',
-            job: 'Plumber',
-            imagePath: 'assets/ye.jpg',
-            contactInfo: 'Phone: 123-456-7890',
-            context: context,
-          ),
-          // Add more announcement cards here as needed
-        ],
+      body: FutureBuilder<List<Announcement>>(
+        future: _announcementsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                Announcement announcement = snapshot.data![index];
+                return _buildAnnouncementCard(
+                  name: snapshot.data![index].name,
+                  job: snapshot.data![index].job,
+                  imagePath: snapshot.data![index].imagePath,
+                  contactInfo: snapshot.data![index].contactInfo,
+                );
+              },
+            );
+          }
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.yellowAccent[700],
@@ -53,8 +96,7 @@ class AnnouncementsPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => const AnnouncemntsPage()),
             );
           } else if (index == 2) {
             Navigator.push(
@@ -72,17 +114,10 @@ class AnnouncementsPage extends StatelessWidget {
     required String job,
     required String imagePath,
     required String contactInfo,
-    required BuildContext context,
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                ContactInfoPage(contactInfo: contactInfo, name: name, job: job),
-          ),
-        );
+        // Handle onTap as needed
       },
       child: Padding(
         padding: const EdgeInsets.all(10.0),
