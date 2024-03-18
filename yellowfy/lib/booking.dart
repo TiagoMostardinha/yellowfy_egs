@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  const BookingPage({Key? key}) : super(key: key);
 
   @override
   _BookingPageState createState() => _BookingPageState();
@@ -9,13 +9,13 @@ class BookingPage extends StatefulWidget {
 
 class _BookingPageState extends State<BookingPage> {
   late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
+  int _selectedHour = 8; // Default hour for booking
+  int _selectedDuration = 1; // Default duration in hours
 
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _selectedTime = TimeOfDay.now();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -32,18 +32,6 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-    );
-    if (pickedTime != null && pickedTime != _selectedTime) {
-      setState(() {
-        _selectedTime = pickedTime;
-      });
-    }
-  }
-
   Future<void> _showConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
@@ -55,7 +43,8 @@ class _BookingPageState extends State<BookingPage> {
             child: ListBody(
               children: <Widget>[
                 Text(
-                    'Your session has been booked for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} at ${_selectedTime.hour}:${_selectedTime.minute}'),
+                  'Your session has been booked for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} at $_selectedHour:00 for $_selectedDuration hours',
+                ),
               ],
             ),
           ),
@@ -101,17 +90,54 @@ class _BookingPageState extends State<BookingPage> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Select Time:',
+              'Select Hour:',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectTime(context),
-              child: Text(
-                'Select Time: ${_selectedTime.hour}:${_selectedTime.minute}',
+            DropdownButton<int>(
+              value: _selectedHour,
+              onChanged: (int? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedHour = newValue;
+                  });
+                }
+              },
+              items: List.generate(
+                24,
+                (index) => DropdownMenuItem(
+                  value: index,
+                  child: Text('${index.toString().padLeft(2, '0')}:00'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Select Duration:',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            DropdownButton<int>(
+              value: _selectedDuration,
+              onChanged: (int? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedDuration = newValue;
+                  });
+                }
+              },
+              items: List.generate(
+                24,
+                (index) => DropdownMenuItem(
+                  value: index + 1,
+                  child: Text('${index + 1} hour${index > 0 ? 's' : ''}'),
+                ),
               ),
             ),
             const Spacer(),
