@@ -1,50 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/announcements.dart';
-import 'package:yellowfy/sign_up.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:yellowfy/login.dart';
+import 'package:yellowfy/main.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
-  Future<void> _login(String email, String password) async {
-    final url = ''; // TODO : espetar o url endpoint do castanheira
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: json.encode(
-          {'email': email, 'password': password},
-        ),
-        headers: {'Content-Type': 'application/json'},
-      );
-      if (response.statusCode == 200) {
-        print('Login Successful');
-        // Navigate to the announcements page
-      } else {
-        print('Login Failed');
-      }
-    } catch (error) {
-      print('Erro: $error');
-    }
-  }
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'YellowFy',
-            style: TextStyle(
-              color: Colors.black,
-              fontFamily: 'Montserrat', // Specify your desired font here
-              fontSize: 24, // Adjust font size as needed
-            ),
-          ),
-        ),
+        title: const Text('Sign Up'),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -71,9 +40,20 @@ class LoginPage extends StatelessWidget {
                 color: Colors.yellowAccent[700]!,
               ),
               child: const Icon(
-                Icons.build,
+                Icons.person_add,
                 size: 70,
                 color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            SizedBox(
+              width: double.infinity,
+              child: TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
             const SizedBox(height: 10.0),
@@ -101,10 +81,11 @@ class LoginPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                // Login button action
+                // Sign Up button action
+                String name = nameController.text.trim();
                 String email = emailController.text.trim();
                 String password = passwordController.text.trim();
-                _login(email, password);
+                // Implement your sign-up logic here
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.yellowAccent[700]!,
@@ -113,7 +94,7 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Login',
+                'Sign Up',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 13,
@@ -123,43 +104,16 @@ class LoginPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Navigate to the sign-up page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignUpPage()),
-                );
+                // Navigate back to the login page
+                Navigator.pop(context);
               },
               child: const Text(
-                "Don't have an account? Sign Up",
+                "Already have an account? Log In",
                 style: TextStyle(color: Colors.blue),
               ),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.yellowAccent[700],
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Login',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-        ],
-        onTap: (int index) {
-          if (index == 1) {
-            // Navigate to the announcements page
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AnnouncementsPage(),
-              ),
-            );
-          }
-        },
       ),
     );
   }
