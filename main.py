@@ -1,15 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import Rate
 from models import Appointment
 from typing import List, Optional
 from datetime import datetime, timedelta
-from fastapi import Query
 
 app = FastAPI()
 
 # Dummy data storage
 appointments = []
+
+# Initialize rate limiting middleware
+limiter = FastAPILimiter(app)
 
 # Endpoint to delete all appointments for a certain contractor in case of account deletion or suspension
 @app.delete("/contractor/{contractor_id}/appointments")
@@ -34,6 +38,7 @@ def check_overlapping_appointments(new_appointment: Appointment):
 
 # CRUD operations
 @app.post("/appointments/")
+@limiter.limit("10/minute")  # Example rate limit: 10 requests per minute
 def create_appointment(appointment: Appointment):
     check_overlapping_appointments(appointment)
     appointment.id = len(appointments) + 1
