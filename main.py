@@ -4,20 +4,28 @@ from fastapi.responses import HTMLResponse
 from models import Appointment
 from typing import List, Optional
 from datetime import datetime, timedelta
+from fastapi import Query
 
 app = FastAPI()
 
 # Dummy data storage
 appointments = []
 
+# Endpoint to delete all appointments for a certain contractor in case of account deletion or suspension
+@app.delete("/contractor/{contractor_id}/appointments")
+def delete_contractor_appointments(contractor_id: int):
+    global appointments
+    appointments = [appointment for appointment in appointments if appointment.contractor_id != contractor_id]
+    return {"message": f"All appointments for contractor {contractor_id} deleted successfully"}
+
 # Helper function to check for overlapping appointments
 def check_overlapping_appointments(new_appointment: Appointment):
     new_start_time = datetime.strptime(new_appointment.date_time, "%Y-%m-%d %H:%M")
-    new_end_time = new_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+    new_end_time = new_start_time + timedelta(hours=new_appointment.duration)  # Calculate end time based on duration
     
     for existing_appointment in appointments:
         existing_start_time = datetime.strptime(existing_appointment.date_time, "%Y-%m-%d %H:%M")
-        existing_end_time = existing_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+        existing_end_time = existing_start_time + timedelta(hours=existing_appointment.duration)  # Calculate end time based on duration
         
         if (new_appointment.contractor_id == existing_appointment.contractor_id and
             ((new_start_time >= existing_start_time and new_start_time < existing_end_time) or
