@@ -2,8 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:yellowfy/login.dart';
 import 'package:yellowfy/main.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
+
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  bool _isYellowWorker = false;
+  String _selectedRole = 'Role'; // Default value for the dropdown
+
+  // Define a list of roles
+  final List<String> _roles = [
+    'Role',
+    'Role 1',
+    'Role 2',
+    'Role 3',
+    // Add more roles as needed
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -79,12 +96,43 @@ class SignUpPage extends StatelessWidget {
                 ),
               ),
             ),
+            CheckboxListTile(
+              title: const Text("Are you a Yellow Worker?"),
+              value: _isYellowWorker,
+              onChanged: (bool? value) {
+                setState(() {
+                  _isYellowWorker = value!;
+                });
+              },
+            ),
+            const SizedBox(height: 10.0),
+            // DropdownButton for selecting roles
+            SizedBox(
+              width: double.infinity,
+              child: DropdownButton<String>(
+                value: _selectedRole,
+                items: _roles.map((String role) {
+                  return DropdownMenuItem<String>(
+                    value: role,
+                    child: Text(role),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  setState(() {
+                    _selectedRole = value!;
+                  });
+                },
+              ),
+            ),
+
             ElevatedButton(
               onPressed: () {
                 // Sign Up button action
                 String name = nameController.text.trim();
                 String email = emailController.text.trim();
                 String password = passwordController.text.trim();
+                // Use _selectedRole to get the selected role
+                // Use _isYellowWorker to determine if the user is a yellow worker
                 // Implement your sign-up logic here
               },
               style: ElevatedButton.styleFrom(
