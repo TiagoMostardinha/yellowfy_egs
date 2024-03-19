@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yellowfy/announcements.dart'; // Importing AnnouncementsPage for navigation
-import 'package:yellowfy/main.dart'; // Importing LoginPage for navigation
+import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart'; // Importing MapPage for navigation
 import 'package:yellowfy/booking.dart'; // Importing BookingPage for navigation
 
