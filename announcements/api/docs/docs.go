@@ -27,6 +27,12 @@ const docTemplate = `{
                 "summary": "Get all announcements",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "id of user who created the announcement",
+                        "name": "userID",
+                        "in": "query"
+                    },
+                    {
                         "type": "number",
                         "description": "radius in meters",
                         "name": "radius",
