@@ -76,17 +76,36 @@ class _SignUpPageState extends State<SignUpPage> {
             const SizedBox(height: 10.0),
             SizedBox(
               width: double.infinity,
-              child: TextField(
+              child: TextFormField(
                 controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password is required';
+                  }
+                  if (value.length < 8) {
+                    return 'Password must be at least 8 characters long';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            SizedBox(
+              width: double.infinity,
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
             CheckboxListTile(
-              title: const Text("Are you a Yellow Worker?"),
+              title: const Text("Are you looking for work?"),
               value: _isYellowWorker,
               onChanged: (bool? value) {
                 setState(() {
