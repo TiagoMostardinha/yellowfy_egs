@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Sign Up</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}. Go to <a href="{{ url_for('auth.login') }}">login page</a>.
+            </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/signup" onsubmit="return validateForm()">
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="text" name="name" placeholder="Name" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="password" name="password" id="password" placeholder="Password" autocomplete="off">
+                    <span id="passwordError" class="help is-danger"></span> <!-- Validation message -->
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Mobile Number</label>
+                <div class="control">
+                    <input class="input is-large" type="tel" name="mobile_number" placeholder="Mobile Number" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Are you:</label>
+                <div class="control">
+                    <label class="radio">
+                        <input type="radio" name="role" value="looking_for_work">
+                        Looking for work
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="role" value="hiring">
+                        Hiring
+                    </label>
+                </div>
+            </div>
+
+            <button class="button is-block is-info is-large is-fullwidth">Sign Up</button>
+        </form>
+    </div>
+</div>
+<script>
+    function validateForm() {
+        var password = document.getElementById("password").value;
+        var passwordError = document.getElementById("passwordError");
+        if (password.length < 8) {
+            passwordError.textContent = "Password must be at least 8 characters long";
+            return false;
+        }
+        passwordError.textContent = ""; // Clear previous error message
+        return true;
+    }
+</script>
+{% endblock %}
