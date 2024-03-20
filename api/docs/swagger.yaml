@@ -46,6 +46,10 @@ paths:
       description: Get all announcements from the database or filter by location and
         radius
       parameters:
+      - description: id of user who created the announcement
+        in: query
+        name: userID
+        type: string
       - description: radius in meters
         in: query
         name: radius
