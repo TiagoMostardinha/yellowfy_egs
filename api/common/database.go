@@ -124,6 +124,21 @@ func (db *Database) GetAnnouncement(id primitive.ObjectID) (Announcement, error)
 	return announcement, nil
 }
 
+func (db *Database) GetAnnouncementsByUserID(id string) ([]Announcement, error) {
+	announcements, err := db.GetAllAnnouncements()
+	if err != nil {
+		return nil, err
+	}
+
+	var announcementsWithUserID []Announcement
+	for _, announcement := range announcements {
+		if announcement.UserID == id {
+			announcementsWithUserID = append(announcementsWithUserID, announcement)
+		}
+	}
+	return announcementsWithUserID, nil
+}
+
 func (db *Database) CreateAnnouncement(newAnnouncement Announcement) (*Announcement, error) {
 	err := db.Ping()
 	if err != nil {
