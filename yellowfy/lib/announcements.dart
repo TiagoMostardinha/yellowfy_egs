@@ -22,6 +22,7 @@ class AnnouncementsPage extends StatelessWidget {
             job: 'Plumber',
             imagePath: 'assets/ye.jpg',
             contactInfo: 'Phone: 123-456-7890',
+            coordinates: '40.6306, -8.6571', // Add coordinates here
             context: context,
           ),
           // Add more announcement cards here as needed
@@ -72,6 +73,7 @@ class AnnouncementsPage extends StatelessWidget {
     required String job,
     required String imagePath,
     required String contactInfo,
+    required String coordinates,
     required BuildContext context,
   }) {
     return GestureDetector(
