@@ -12,5 +12,6 @@ class Appointment(BaseModel):
     contractor_name: str
     contractor_contact: str
     contractor_id: int  
+    duration: int
     details: Optional[str] = None
 

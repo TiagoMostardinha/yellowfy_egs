@@ -4,20 +4,47 @@ from fastapi.responses import HTMLResponse
 from models import Appointment
 from typing import List, Optional
 from datetime import datetime, timedelta
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.openapi.models import OAuthFlowPassword as OAuthFlowPasswordModel
+import redis
 
 app = FastAPI()
 
 # Dummy data storage
 appointments = []
 
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+# Cache functions
+def cache_client_token(client_id: int, token: str):
+    redis_client.set(f"client:{client_id}", token)
+
+def get_client_token(client_id: int):
+    return redis_client.get(f"client:{client_id}")
+
+def cache_nearby_contractor_token(contractor_id: int, token: str):
+    redis_client.set(f"contractor:{contractor_id}", token)
+
+def get_nearby_contractor_token(contractor_id: int):
+    return redis_client.get(f"contractor:{contractor_id}")
+
+
+# Endpoint to delete all appointments for a certain contractor in case of account deletion or suspension
+@app.delete("/contractor/{contractor_id}/appointments")
+def delete_contractor_appointments(contractor_id: int):
+    global appointments
+    appointments = [appointment for appointment in appointments if appointment.contractor_id != contractor_id]
+    return {"message": f"All appointments for contractor {contractor_id} deleted successfully"}
+
 # Helper function to check for overlapping appointments
 def check_overlapping_appointments(new_appointment: Appointment):
     new_start_time = datetime.strptime(new_appointment.date_time, "%Y-%m-%d %H:%M")
-    new_end_time = new_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+    new_end_time = new_start_time + timedelta(hours=new_appointment.duration)  # Calculate end time based on duration
     
     for existing_appointment in appointments:
         existing_start_time = datetime.strptime(existing_appointment.date_time, "%Y-%m-%d %H:%M")
-        existing_end_time = existing_start_time + timedelta(minutes=30)  # Assuming each appointment lasts for 30 minutes
+        existing_end_time = existing_start_time + timedelta(hours=existing_appointment.duration)  # Calculate end time based on duration
         
         if (new_appointment.contractor_id == existing_appointment.contractor_id and
             ((new_start_time >= existing_start_time and new_start_time < existing_end_time) or
