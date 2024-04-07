@@ -1,19 +1,34 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
-from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import Rate
 from models import Appointment
 from typing import List, Optional
 from datetime import datetime, timedelta
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.openapi.models import OAuthFlowPassword as OAuthFlowPasswordModel
+import redis
 
 app = FastAPI()
 
 # Dummy data storage
 appointments = []
 
-# Initialize rate limiting middleware
-limiter = FastAPILimiter(app)
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+# Cache functions
+def cache_client_token(client_id: int, token: str):
+    redis_client.set(f"client:{client_id}", token)
+
+def get_client_token(client_id: int):
+    return redis_client.get(f"client:{client_id}")
+
+def cache_nearby_contractor_token(contractor_id: int, token: str):
+    redis_client.set(f"contractor:{contractor_id}", token)
+
+def get_nearby_contractor_token(contractor_id: int):
+    return redis_client.get(f"contractor:{contractor_id}")
+
 
 # Endpoint to delete all appointments for a certain contractor in case of account deletion or suspension
 @app.delete("/contractor/{contractor_id}/appointments")
@@ -38,7 +53,6 @@ def check_overlapping_appointments(new_appointment: Appointment):
 
 # CRUD operations
 @app.post("/appointments/")
-@limiter.limit("10/minute")  # Example rate limit: 10 requests per minute
 def create_appointment(appointment: Appointment):
     check_overlapping_appointments(appointment)
     appointment.id = len(appointments) + 1
