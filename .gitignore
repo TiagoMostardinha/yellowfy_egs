@@ -1,3 +1,3 @@
-api/api
-api/vendor/
-db/
+announcements/api/api
+announcements/api/vendor/
+announcements/db/
