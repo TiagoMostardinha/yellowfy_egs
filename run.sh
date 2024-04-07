@@ -14,7 +14,7 @@ tmux split-window -h -t runProject:bash.1
 # send command to the first pane
 tmux send-keys -t runProject:bash.1 "cd $YELLOWFY_DIR/announcements/api && ./api" C-m
 tmux send-keys -t runProject:bash.2 "cd $YELLOWFY_DIR/Booking/ && uvicorn main:app --reload" C-m
-tmux send-keys -t runProject:bash.3 "cd $YELLOWFY_DIR/auth_app/project/ && sh setup" C-m
+tmux send-keys -t runProject:bash.3 "cd $YELLOWFY_DIR/auth_app/project/ && sh setup.sh" C-m
 tmux send-keys -t runProject:bash.4 "cd $YELLOWFY_DIR/yellowfy/ && flutter run" C-m
 
 
