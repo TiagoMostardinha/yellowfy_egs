@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_maps_flutter: ^2.0.10
+  geolocator: ^11.0.0
   cupertino_icons: ^1.0.6
   dio: ^5.4.1
   flutter_polyline_points: ^2.0.0
