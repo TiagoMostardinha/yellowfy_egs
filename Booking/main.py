@@ -52,33 +52,6 @@ def check_overlapping_appointments(new_appointment: Appointment):
              (existing_start_time >= new_start_time and existing_start_time < new_end_time))):
             raise HTTPException(status_code=400, detail="Appointment time slot is not available")
 
-
-class AvailableHour(BaseModel):
-    hour: str
-
-def get_available_hours(date: str, contractor_id: int) -> List[AvailableHour]:
-    # Convert the date string to a datetime object
-    selected_date = datetime.strptime(date, "%Y-%m-%d")
-
-    # Initialize available hours list with all workday hours
-    available_hours = [f"{hour:02d}:00" for hour in range(8, 20)]
-
-    # Filter out hours that have appointments
-    for appointment in appointments:
-        if appointment.contractor_id == contractor_id and appointment.date_time.startswith(date):
-            appointment_start_hour = int(appointment.date_time.split()[1].split(":")[0])
-            appointment_end_hour = appointment_start_hour + appointment.duration
-            for hour in range(appointment_start_hour, appointment_end_hour):
-                if f"{hour:02d}:00" in available_hours:
-                    available_hours.remove(f"{hour:02d}:00")
-
-    # Convert available hours list to list of AvailableHour objects
-    return [AvailableHour(hour=hour) for hour in available_hours]
-
-@app.get("/contractor/{contractor_id}/available-hours/")
-def get_contractor_available_hours(date: str, contractor_id: int):
-    return get_available_hours(date, contractor_id)
-
 # CRUD operations
 @app.post("/appointments/")
 def create_appointment(appointment: Appointment):
