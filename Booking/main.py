@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from models import Appointment
 from typing import List, Optional
 from datetime import datetime, timedelta
