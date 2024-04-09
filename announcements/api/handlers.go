@@ -26,6 +26,7 @@ func handleReadiness(c *gin.Context) {
 // GetAnnouncements	godoc
 // @Summary			Get all announcements
 // @Description		Get all announcements from the database or filter by location and radius
+// @Param			userID	query	string	false	"id of user who created the announcement"
 // @Param			radius	query	float64	false	"radius in meters"
 // @Param			lat		query	float64	false	"latitude"
 // @Param			long	query	float64	false	"longitude"
@@ -39,6 +40,7 @@ func handleGetAnnouncemnts(c *gin.Context) {
 	radiusQuery := c.Query("radius")
 	latQuery := c.Query("lat")
 	longQuery := c.Query("long")
+	userIdQuery := c.Query("userID")
 
 	var announcements []Announcement
 	var err error
@@ -83,6 +85,9 @@ func handleGetAnnouncemnts(c *gin.Context) {
 	} else {
 		if radiusQuery == "" && latQuery == "" && longQuery == "" {
 			announcements, err = AnnouncementDB.GetAllAnnouncements()
+			if userIdQuery != "" {
+				announcements, err = AnnouncementDB.GetAnnouncementsByUserID(userIdQuery)
+			}
 		} else {
 			c.IndentedJSON(
 				http.StatusBadRequest,

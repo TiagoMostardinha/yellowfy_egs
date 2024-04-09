@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart';
 import 'package:yellowfy/contactspage.dart';
+import 'package:yellowfy/common/handleAnnouncements.dart';
+import 'package:yellowfy/models/announcements.dart';
 
 class AnnouncementsPage extends StatelessWidget {
   const AnnouncementsPage({super.key});
@@ -14,18 +16,31 @@ class AnnouncementsPage extends StatelessWidget {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
-      body: ListView(
-        scrollDirection: Axis.vertical, // Vertical scrolling
-        children: [
-          _buildAnnouncementCard(
-            name: 'John Doe',
-            job: 'Plumber',
-            imagePath: 'assets/ye.jpg',
-            contactInfo: 'Phone: 123-456-7890',
-            context: context,
-          ),
-          // Add more announcement cards here as needed
-        ],
+      body: FutureBuilder<List<Announcement>>(
+        future: handleAnnouncements().handleGetAnnouncements(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            List<Announcement>? announcements = snapshot.data;
+            return ListView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: announcements!.length,
+              itemBuilder: (context, index) {
+                return _buildAnnouncementCard(
+                  name: announcements[index].userId,
+                  job: announcements[index].category,
+                  imagePath: 'assets/ye.jpg',
+                  contactInfo: announcements[index].description,
+                  coordinates: announcements[index].coordinates.toString(),
+                  context: context,
+                );
+              },
+            );
+          }
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.yellowAccent[700],
@@ -72,6 +87,7 @@ class AnnouncementsPage extends StatelessWidget {
     required String job,
     required String imagePath,
     required String contactInfo,
+    required String coordinates,
     required BuildContext context,
   }) {
     return GestureDetector(

@@ -1,0 +1,31 @@
+version: '3'
+
+networks:
+  api_db_net:
+    driver: bridge
+
+
+
+services:
+  api:
+    build: ./api
+    environment:
+      - PORT=8080
+      - DB_URI=mongodb://mongodb:27017
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    networks:
+      - api_db_net
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - api_db_net
+
+volumes:
+  mongo-data: {}
