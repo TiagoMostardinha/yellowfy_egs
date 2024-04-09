@@ -10,4 +10,5 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000))
     looking_for_work = db.Column(db.Boolean, default=True)  # Add this line for radio buttons
-    mobile_number = db.Column(db.String(20))  # Add this line for mobile number input
+    mobile_number = db.Column(db.String(20))  # Add this line for mobile number input//
+    google_token = db.Column(db.String(1000))  # Add this line for google token
