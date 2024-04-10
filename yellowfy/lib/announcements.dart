@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart';
 import 'package:yellowfy/contactspage.dart';
-import 'package:yellowfy/common/handleAnnouncements.dart';
+import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
 
 class AnnouncementsPage extends StatelessWidget {
@@ -17,7 +17,7 @@ class AnnouncementsPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: FutureBuilder<List<Announcement>>(
-        future: handleAnnouncements().handleGetAnnouncements(),
+        future: Handlers().handleGetAnnouncements(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -35,6 +35,7 @@ class AnnouncementsPage extends StatelessWidget {
                   imagePath: 'assets/ye.jpg',
                   contactInfo: announcements[index].description,
                   coordinates: announcements[index].coordinates.toString(),
+                  id: announcements[index].id,
                   context: context,
                 );
               },
@@ -88,6 +89,7 @@ class AnnouncementsPage extends StatelessWidget {
     required String imagePath,
     required String contactInfo,
     required String coordinates,
+    required String id,
     required BuildContext context,
   }) {
     return GestureDetector(
@@ -95,8 +97,11 @@ class AnnouncementsPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                ContactInfoPage(contactInfo: contactInfo, name: name, job: job),
+            builder: (context) => ContactInfoPage(
+                contactInfo: contactInfo,
+                name: name,
+                job: job,
+                announcement_id: id),
           ),
         );
       },

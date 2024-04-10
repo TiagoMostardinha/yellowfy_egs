@@ -11,9 +11,32 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   GoogleMapController? mapController;
+  LatLng? currentLocation;
+  Set<Marker> markers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
 
   // Define an initial camera position
-  static const LatLng _center = const LatLng(40.6306, -8.6571);
+  static const LatLng _center = const LatLng(40.6360, -8.6532);
+
+  Future<Position> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied.');
+      }
+    }
+    return await Geolocator.getCurrentPosition();
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -63,10 +86,25 @@ class _MapPageState extends State<MapPage> {
       ),
       body: GoogleMap(
         onMapCreated: _onMapCreated,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
         initialCameraPosition: const CameraPosition(
           target: _center,
           zoom: 11.0,
         ),
+        markers: markers,
+        /*
+        circles: {
+          Circle(
+            circleId: CircleId('1'),
+            center: _center,
+            radius: 1000,
+            fillColor: Colors.blue.withOpacity(0.1),
+            strokeWidth: 1,
+            strokeColor: Colors.blue,
+          ),
+        },
+        */
       ),
     );
   }

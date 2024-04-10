@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:yellowfy/common/Handlers.dart';
+import 'package:yellowfy/models/appointment.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({Key? key}) : super(key: key);
+  const BookingPage({super.key, required this.announcement_id});
+  final String announcement_id;
 
   @override
+  // ignore: library_private_types_in_public_api
   _BookingPageState createState() => _BookingPageState();
 }
 
 class _BookingPageState extends State<BookingPage> {
   late DateTime _selectedDate;
-  int _selectedHour = 8; // Default hour for booking
-  int _selectedDuration = 1; // Default duration in hours
+  int _selectedHour = 0;
 
   // Dummy list of booked slots for demonstration
   Map<DateTime, List<int>> bookedSlots = {
     DateTime.now(): [10, 12, 15], // Example: Already booked hours for today
-    DateTime.now().add(Duration(days: 1)): [
-      9,
-      13,
-      14
-    ], // Example: Already booked hours for tomorrow
   };
 
   @override
@@ -57,7 +55,7 @@ class _BookingPageState extends State<BookingPage> {
                   color: Colors.blueAccent.withOpacity(0.4),
                   shape: BoxShape.circle,
                 ),
-                selectedDecoration: BoxDecoration(
+                selectedDecoration: const BoxDecoration(
                   color: Colors.blueAccent,
                   shape: BoxShape.circle,
                 ),
@@ -98,6 +96,8 @@ class _BookingPageState extends State<BookingPage> {
                 onPressed: () {
                   // Handle booking logic here
                   _showConfirmationDialog(context); // Show confirmation dialog
+                  // print announvement id
+                  print('ola');
                 },
                 child: const Text('Book Session'),
               ),
@@ -155,7 +155,7 @@ class _BookingPageState extends State<BookingPage> {
             child: ListBody(
               children: <Widget>[
                 Text(
-                  'Your session has been booked for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} at $_selectedHour:00 for $_selectedDuration hours',
+                  'Your session has been booked for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} at $_selectedHour:00 with the ${widget.announcement_id} announcement.',
                 ),
               ],
             ),
@@ -172,10 +172,4 @@ class _BookingPageState extends State<BookingPage> {
       },
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: BookingPage(),
-  ));
 }

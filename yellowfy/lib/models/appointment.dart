@@ -1,5 +1,6 @@
 class Appointment {
   final String id;
+  final String announcement_id;
   final String service;
   final String date_time;
   final String client_id;
@@ -10,6 +11,7 @@ class Appointment {
   final String details;
   Appointment(
       this.id,
+      this.announcement_id,
       this.service,
       this.date_time,
       this.client_id,
