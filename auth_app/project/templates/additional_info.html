@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Additional Info</h3>
+    <div class="box">
+        <form method="POST" action="{{ url_for('auth.additional_info') }}" onsubmit="return validateForm">
+            <div class="field">
+                <label class="label">Name:</label>
+                <div class="control">
+                    <input class="input is-large" type="text" id="name" name="name" value="{{ name }}" required autofocus="">
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="label">Looking for Work:</label>
+                <div class="control">
+                    <input class="checkbox" type="checkbox" id="looking_for_work" name="looking_for_work">
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="label">Mobile Number:</label>
+                <div class="control">
+                    <input class="input is-large" type="tel" id="mobile_number" name="mobile_number" required>
+                </div>
+            </div>
+
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="hidden" name="google_token" value="{{ google_token }}">
+
+            <button class="button is-block is-info is-large is-fullwidth">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function validateForm() {
+        var mobile_number = document.getElementById("mobile_number").value;
+        if (mobile_number.length !== 10) {
+            alert("Mobile number must be 10 digits long.");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+{% endblock %}

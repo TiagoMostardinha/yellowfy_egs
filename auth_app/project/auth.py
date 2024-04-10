@@ -1,11 +1,10 @@
-# auth.py
-
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+import secrets
+from flask import Blueprint, abort, jsonify, render_template, redirect, session, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from .models import User
 from . import db
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
 from authlib.integrations.flask_client import OAuth
 from flask import current_app as app
 
@@ -13,17 +12,14 @@ auth = Blueprint('auth', __name__)
 oauth = OAuth(app)
 
 google = oauth.register(
-        name='google',
-        client_id='your_google_client_id',
-        client_secret='your_google_client_secret',
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        authorize_params=None,
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        access_token_params=None,
-        refresh_token_url=None,
-        refresh_token_params=None,
-        redirect_uri='http://localhost:5000/login/google/callback',
-        client_kwargs={'scope': 'openid profile email'}
+    'google',
+    client_id='422415598710-9qgcl2923q32a0ug4mie79mb6jar0g5l.apps.googleusercontent.com',
+    client_secret='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',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    client_kwargs={'scope': 'openid profile email'},
+    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
+    redirect_uri='http://127.0.0.1:5000/login/google/callback'
 )
 
 @auth.route('/login')
@@ -38,17 +34,13 @@ def login_post():
 
     user = User.query.filter_by(email=email).first()
 
-    # check if user actually exists
-    # take the user supplied password, hash it, and compare it to the hashed password in database
     if not user or not check_password_hash(user.password, password): 
         flash('Please check your login details and try again.')
-        return redirect(url_for('auth.login')) # if user doesn't exist or password is wrong, reload the page
+        return redirect(url_for('auth.login'))
 
-    # if the above check passes, then we know the user has the right credentials
     login_user(user, remember=remember)
-    #obtain user_id from user object
     user_id = user.id
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=user.id, issuer='https://accounts.google.com')
     refresh_token = create_refresh_token(identity=user.id)
 
     return {'access_token': access_token, 'refresh_token': refresh_token}, 200
@@ -63,39 +55,34 @@ def signup_post():
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
-    looking_for_work = request.form.get('looking_for_work') == 'on'  # Assuming the input name is 'looking_for_work'
-    print(looking_for_work)
+    looking_for_work = request.form.get('looking_for_work') == 'on'
     mobile_number = request.form.get('mobile_number')
 
-    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+    user = User.query.filter_by(email=email).first()
 
-    if user: # if a user is found, we want to redirect back to signup page so user can try again  
+    if user:
         flash('Email address already exists')
         return redirect(url_for('auth.signup'))
 
-    # create new user with the form data. Hash the password so plaintext version isn't saved.
     new_user = User(email=email, name=name, password=generate_password_hash(password, method='pbkdf2:sha256'), looking_for_work=looking_for_work, mobile_number=mobile_number)
 
-    # add the new user to the database
     db.session.add(new_user)
     db.session.commit()
 
     return redirect(url_for('auth.login'))
 
 @auth.route('/userinfo')
-@jwt_required()  # Secure the endpoint with JWT authentication
+@jwt_required()
 def userinfo():
     current_user_id = get_jwt_identity()
-    # Retrieve user information based on user_id
     user = User.query.get(current_user_id)
     if user:
-        # Return user information including the new fields
         return {
             'id': user.id,
             'name': user.name,
             'email': user.email,
             'looking_for_work': user.looking_for_work,
-            'mobile_number': user.mobile_number
+            'mobile_number': user.mobile_number,
         }, 200
     else:
         return 'User not found', 404
@@ -103,17 +90,124 @@ def userinfo():
 @auth.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
-    current_user_id = get_jwt_identity()  # Get the user ID from the refresh token
-    access_token = create_access_token(identity=current_user_id)  # Generate a new access token
-    return { 'access_token': access_token}, 200
+    current_user_id = get_jwt_identity()
+    access_token = create_access_token(identity=current_user_id, issuer='https://accounts.google.com')
+    return {'access_token': access_token}, 200
 
 @auth.route('/login/google')
 def google_login():
-    return google.authorize_redirect(redirect_uri=url_for('auth.google_login', _external=True))
+    state = secrets.token_urlsafe(16)
+    nonce = secrets.token_urlsafe(16)
+    session['oauth_state'] = state
+    session['oauth_nonce'] = nonce
+    return google.authorize_redirect(redirect_uri=url_for('auth.google_callback', _external=True),state=state,nonce=nonce)
+
+
+@auth.route('/login/google/callback')
+def google_callback():
+
+    if request.args.get('state') != session.get('oauth_state'):
+        abort(403, 'Invalid state')
+
+    token = google.authorize_access_token()
+    # create nonce
+    nonce = session.pop('oauth_nonce', None)
+    user_info = google.parse_id_token(token, nonce)
+
+    user_info = google.get("https://www.googleapis.com/oauth2/v2/userinfo").json()
+
+    print(user_info)  # Debugging line to check the user_info dictionary
+
+    if 'email' not in user_info:
+        abort(500, 'Email not found in user info')
+
+    user = User.query.filter_by(email=user_info['email']).first()
+
+    google_token = token['access_token']  # Fetching Google token
+
+    if not user:
+        # First time logging in with Google
+        return render_template('additional_info.html', email=user_info['email'],name=user_info['name'], google_token=google_token)
+    else:
+        user.email = user_info['email']
+        user.name = user_info['name']
+        user.google_token = google_token  # Updating google_token
+
+        user_id = user.id
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+
+        db.session.commit()
+
+        login_user(user)
+
+        return {'access_token': access_token, 'refresh_token': refresh_token}, 200
+
+
+@auth.route('/additional_info', methods=['POST'])
+def additional_info():
+
+    email = request.form.get('email')
+    name = request.form.get('name')
+    looking_for_work = request.form.get('looking_for_work') == 'on'
+    mobile_number = request.form.get('mobile_number')
+    google_token = request.form.get('google_token')
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        user = User(email=email, 
+                    name=name, 
+                    password=generate_password_hash(secrets.token_urlsafe(16), method='pbkdf2:sha256'), 
+                    looking_for_work=looking_for_work, 
+                    mobile_number=mobile_number, 
+                    google_token=google_token)
+        db.session.add(user)
+    else:
+        user.name = name
+        user.looking_for_work = looking_for_work
+        user.mobile_number = mobile_number
+        user.google_token = google_token
+
+    db.session.commit()
+
+    user_id = user.id
+    access_token = create_access_token(identity=user.id)
+    refresh_token = create_refresh_token(identity=user.id)
+
+    login_user(user)
+
+    return {'access_token': access_token, 'refresh_token': refresh_token}, 200
+
+
+@auth.route('/get_google_token', methods=['POST'])
+@jwt_required()
+def get_google_token():
+
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if user:
+        return {
+            'google_token': user.google_token
+        }, 200
+    else:
+        return 'User not found', 404
+
+@auth.route('/all_users_google_token', methods=['GET'])
+@jwt_required()
+# return id and google_token of all users
+def all_users_google_token():
+    
+        users = User.query.all()
+        users_google_token = []
+        # Fetching google_token of all users and id
+        for user in users:
+            users_google_token.append({'id': user.id, 'google_token': user.google_token})
+    
+        return jsonify(users_google_token)
 
 @auth.route('/logout')
-@jwt_required
+@jwt_required()
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
-
