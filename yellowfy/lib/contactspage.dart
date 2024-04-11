@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/announcements.dart'; // Importing AnnouncementsPage for navigation
+import 'package:yellowfy/announcements.dart';
 import 'package:yellowfy/login.dart';
-import 'package:yellowfy/map.dart'; // Importing MapPage for navigation
-import 'package:yellowfy/booking.dart'; // Importing BookingPage for navigation
+import 'package:yellowfy/map.dart';
+import 'package:yellowfy/booking.dart';
 
 class ContactInfoPage extends StatelessWidget {
   final String contactInfo;
   final String name;
   final String job;
+  final String announcement_id;
 
   const ContactInfoPage({
-    super.key,
+    Key? key,
     required this.contactInfo,
     required this.name,
     required this.job,
-  });
+    required this.announcement_id,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +71,12 @@ class ContactInfoPage extends StatelessWidget {
             height: 50,
             child: TextButton(
               onPressed: () {
+                print(announcement_id);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const BookingPage()),
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          BookingPage(announcement_id: announcement_id)),
                 );
               },
               style: TextButton.styleFrom(

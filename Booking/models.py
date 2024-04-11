@@ -5,6 +5,7 @@ from typing import Optional
 
 class Appointment(BaseModel):
     id: int
+    announcement_id: str
     service_type: str
     date_time: str
     client_id: int
