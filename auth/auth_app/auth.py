@@ -2,8 +2,8 @@ import secrets
 from flask import Blueprint, abort, jsonify, render_template, redirect, session, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
-from .models import User
-from . import db
+from models import User
+from app import db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
 from authlib.integrations.flask_client import OAuth
 from flask import current_app as app
