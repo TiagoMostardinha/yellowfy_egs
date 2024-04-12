@@ -19,7 +19,7 @@ google = oauth.register(
     access_token_url='https://accounts.google.com/o/oauth2/token',
     client_kwargs={'scope': 'openid profile email'},
     jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
-    redirect_uri='http://127.0.0.1:5000/login/google/callback'
+    redirect_uri='http://0.0.0.0:5000/login/google/callback'
 )
 
 @auth.route('/login')
