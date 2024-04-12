@@ -1,6 +1,0 @@
-Flask
-Flask-JWT-Extended
-Flask-Login
-Flask-SQLAlchemy
-authlib
-requests
