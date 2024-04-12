@@ -21,8 +21,8 @@ class Handlers {
         var userId = i['userID'] ?? '';
         var category = i['category'] ?? '';
         var description = i['description'] ?? '';
-        var latitude = double.tryParse(i['latitude'] ?? '') ?? 0.0;
-        var longitude = double.tryParse(i['longitude'] ?? '') ?? 0.0;
+        var latitude = (i['location']['lat'] ?? '') ?? 0.0;
+        var longitude = ((i['location']['long'] ?? '') ?? 0.0);
 
         announcements.add(Announcement(
           id: id,
@@ -62,6 +62,27 @@ class Handlers {
       return announcement;
     } else {
       throw Exception('Failed to load announcements: ${response.statusCode}');
+    }
+  }
+
+  Future<void> handlePostAnnouncement(Announcement announcement) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
+    final response = await http.post(
+      Uri.parse("http://$url:$port/v0/"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'userID': announcement.userId,
+        'category': announcement.category,
+        'description': announcement.description,
+        'latitude': announcement.coordinates.latitude,
+        'longitude': announcement.coordinates.longitude,
+      }),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to post announcement: ${response.statusCode}');
     }
   }
 

@@ -9,6 +9,8 @@ class ContactInfoPage extends StatelessWidget {
   final String name;
   final String job;
   final String announcement_id;
+  final String coordinates;
+  final String description;
 
   const ContactInfoPage({
     Key? key,
@@ -16,6 +18,8 @@ class ContactInfoPage extends StatelessWidget {
     required this.name,
     required this.job,
     required this.announcement_id,
+    required this.coordinates,
+    required this.description,
   }) : super(key: key);
 
   @override
@@ -30,11 +34,12 @@ class ContactInfoPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(height: 20),
           const CircleAvatar(
             radius: 80,
             backgroundImage: AssetImage('assets/ye.jpg'), // Placeholder photo
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Text(
             name,
             style: const TextStyle(
@@ -54,14 +59,19 @@ class ContactInfoPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.phone, color: Colors.green),
-                onPressed: () {},
+              Text(
+                coordinates,
+                style: TextStyle(fontSize: 18),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.message, color: Colors.blue),
-                onPressed: () {},
+            ],
+          ),
+          const SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                contactInfo,
+                style: TextStyle(fontSize: 10),
               ),
             ],
           ),
