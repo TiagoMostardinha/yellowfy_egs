@@ -17,20 +17,6 @@ appointments = []
 
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-# Cache functions
-def cache_client_token(client_id: int, token: str):
-    redis_client.set(f"client:{client_id}", token)
-
-def get_client_token(client_id: int):
-    return redis_client.get(f"client:{client_id}")
-
-def cache_nearby_contractor_token(contractor_id: int, token: str):
-    redis_client.set(f"contractor:{contractor_id}", token)
-
-def get_nearby_contractor_token(contractor_id: int):
-    return redis_client.get(f"contractor:{contractor_id}")
-
-
 # Endpoint to delete all appointments for a certain contractor in case of account deletion or suspension
 @app.delete("/contractor/{contractor_id}/appointments")
 def delete_contractor_appointments(contractor_id: int):
