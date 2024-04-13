@@ -1,5 +1,6 @@
 import 'package:yellowfy/models/announcements.dart';
 import 'package:yellowfy/models/appointment.dart';
+import 'package:yellowfy/models/authentication.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
@@ -117,7 +118,79 @@ class Handlers {
     }
   }
 
+  Future<void> handlePostAppointment(Appointment appointment) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
+    final response = await http.post(
+      Uri.parse("http://$url:$port/"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'announcement_id': appointment.announcement_id,
+        'service': appointment.service,
+        'date_time': appointment.date_time,
+        'client_id': appointment.client_id,
+        'client_name': appointment.client_name,
+        'contractor_name': appointment.contractor_name,
+        'contractor_contact': appointment.contractor_contact,
+        'contractor_id': appointment.contractor_id,
+        'details': appointment.details,
+      }),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to post appointment: ${response.statusCode}');
+    }
+  }
+
   /*
   * Authentication
   */
+
+  Future<List<Authentication>> handleGetAuthentication() async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
+    final response = await http.get(Uri.parse("http://$url:$port/"));
+    if (response.statusCode == 200) {
+      List<Authentication> authentications = [];
+      var data = jsonDecode(response.body);
+      print(data);
+      for (var i in data) {
+        authentications.add(Authentication(
+          i['id'] ?? '',
+          i['name'] ?? '',
+          i['email'] ?? '',
+          i['password'] ?? '',
+          i['looking_for_work'] ?? '',
+          i['mobile_number'] ?? '',
+          i['google_token'] ?? '',
+        ));
+      }
+      return authentications;
+    } else {
+      throw Exception('Failed to load authentications: ${response.statusCode}');
+    }
+  }
+
+  Future<void> handlePostAuthentication(Authentication authentication) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
+    final response = await http.post(
+      Uri.parse("http://$url:$port/"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'name': authentication.name,
+        'email': authentication.email,
+        'password': authentication.password,
+        'looking_for_work': authentication.looking_for_work,
+        'mobile_number': authentication.mobile_number,
+        'google_token': authentication.google_token,
+      }),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to post authentication: ${response.statusCode}');
+    }
+  }
 }

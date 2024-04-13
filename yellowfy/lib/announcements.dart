@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:yellowfy/createAnnouncementPage.dart';
 import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart';

@@ -7,21 +7,15 @@ class LoginPage extends StatelessWidget {
 
   // Function to handle login with Yellowfy
   void _loginYellowfy(BuildContext context) async {
-    final Uri url = Uri.parse('YOUR_YELLOWFY_LOGIN_URL_HERE');
-    if (await canLaunch(url.toString())) {
-      await launch(url.toString());
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  // Function to handle login with Google
-  void _loginGoogle(BuildContext context) async {
-    final Uri url = Uri.parse('YOUR_GOOGLE_LOGIN_URL_HERE');
-    if (await canLaunch(url.toString())) {
-      await launch(url.toString());
-    } else {
-      throw 'Could not launch $url';
+    final Uri url = Uri.parse('http://10.0.2.2:5000');
+    try {
+      if (await canLaunch(url.toString())) {
+        await launch(url.toString());
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
     }
   }
 
@@ -73,27 +67,6 @@ class LoginPage extends StatelessWidget {
                       'Login with Yellowfy',
                       style: TextStyle(
                         color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20.0),
-              GestureDetector(
-                onTap: () => _loginGoogle(context),
-                child: Container(
-                  width: 200.0,
-                  padding: const EdgeInsets.all(15.0),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent[700],
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Login with Google',
-                      style: TextStyle(
-                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
