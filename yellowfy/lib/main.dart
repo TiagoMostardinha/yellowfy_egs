@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'login.dart'; // Import the login page file
-import 'sign_up.dart'; // Import the sign up page file
+import 'login.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -21,7 +20,6 @@ class MyApp extends StatelessWidget {
         home: const LoginPage(), // Set LoginPage as the home screen
         routes: {
           '/login': (context) => const LoginPage(),
-          '/signup': (context) => const SignUpPage()
         });
   }
 }

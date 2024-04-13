@@ -1,140 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yellowfy/announcements.dart';
-import 'package:yellowfy/sign_up.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
-  Future<void> _login(String email, String password) async {
-    final url = ''; // TODO : espetar o url endpoint do castanheira
+  // Function to handle login with Yellowfy
+  void _loginYellowfy(BuildContext context) async {
+    final Uri url = Uri.parse('http://10.0.2.2:5000');
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: json.encode(
-          {'email': email, 'password': password},
-        ),
-        headers: {'Content-Type': 'application/json'},
-      );
-      if (response.statusCode == 200) {
-        print('Login Successful');
-        // Navigate to the announcements page
+      if (await canLaunch(url.toString())) {
+        await launch(url.toString());
       } else {
-        print('Login Failed');
+        throw 'Could not launch $url';
       }
-    } catch (error) {
-      print('Erro: $error');
+    } catch (e) {
+      print('Error launching URL: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'YellowFy',
-            style: TextStyle(
-              color: Colors.black,
-              fontFamily: 'Montserrat', // Specify your desired font here
-              fontSize: 24, // Adjust font size as needed
-            ),
+        title: const Text(
+          'YellowFy',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'Montserrat', // Specify your desired font here
+            fontSize: 24, // Adjust font size as needed
           ),
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.yellowAccent[700]!, Colors.yellowAccent[700]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        centerTitle: true,
+        backgroundColor: Colors.yellowAccent[700],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 10.0,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.yellowAccent[700]!,
-              ),
-              child: const Icon(
-                Icons.build,
-                size: 70,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            SizedBox(
-              width: double.infinity,
-              child: TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.yellowAccent[700]!,
                 ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            SizedBox(
-              width: double.infinity,
-              child: TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Login button action
-                String email = emailController.text.trim();
-                String password = passwordController.text.trim();
-                _login(email, password);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellowAccent[700]!,
-                textStyle: const TextStyle(
+                child: const Icon(
+                  Icons.build,
+                  size: 70,
                   color: Colors.black,
                 ),
               ),
-              child: const Text(
-                'Login',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 30.0),
+              GestureDetector(
+                onTap: () => _loginYellowfy(context),
+                child: Container(
+                  width: 200.0,
+                  padding: const EdgeInsets.all(15.0),
+                  decoration: BoxDecoration(
+                    color: Colors.yellowAccent[700],
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Login with Yellowfy',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                // Navigate to the sign-up page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignUpPage()),
-                );
-              },
-              child: const Text(
-                "Don't have an account? Sign Up",
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
