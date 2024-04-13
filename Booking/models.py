@@ -1,13 +1,20 @@
 # models.py
-
 from pydantic import BaseModel
-from typing import Optional
+from datetime import datetime
+from sqlalchemy.ext.declarative import declarative_base
 
-class Appointment(BaseModel):
-    id: int
-    announcement_id: str
-    date_time: str
+Base = declarative_base()
+
+class AppointmentBase(BaseModel):
     client_id: int
-    contractor_id: int  
+    contractor_id: int
+    announcement_id: int
+    date_time: datetime
     duration: int
 
+
+class Appointment(AppointmentBase):
+    id: int
+
+    class Config:
+        from_attributes = True
