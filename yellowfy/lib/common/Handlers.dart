@@ -100,16 +100,11 @@ class Handlers {
       print(data);
       for (var i in data) {
         appointments.add(Appointment(
-          i['id'] ?? '',
           i['announcement_id'] ?? '',
-          i['service'] ?? '',
           i['date_time'] ?? '',
           i['client_id'] ?? '',
-          i['client_name'] ?? '',
-          i['contractor_name'] ?? '',
-          i['contractor_contact'] ?? '',
           i['contractor_id'] ?? '',
-          i['details'] ?? '',
+          i['duration'] ?? '',
         ));
       }
       return appointments;
@@ -128,14 +123,10 @@ class Handlers {
       },
       body: jsonEncode(<String, dynamic>{
         'announcement_id': appointment.announcement_id,
-        'service': appointment.service,
         'date_time': appointment.date_time,
         'client_id': appointment.client_id,
-        'client_name': appointment.client_name,
-        'contractor_name': appointment.contractor_name,
-        'contractor_contact': appointment.contractor_contact,
         'contractor_id': appointment.contractor_id,
-        'details': appointment.details,
+        'duration': appointment.duration,
       }),
     );
     if (response.statusCode != 201) {
@@ -147,28 +138,27 @@ class Handlers {
   * Authentication
   */
 
-  Future<List<Authentication>> handleGetAuthentication() async {
+  Future<Authentication> handleGetAuthentication() async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/"));
+
+    final response = await http.get(Uri.parse("http://$url:$port/login/"));
+
     if (response.statusCode == 200) {
-      List<Authentication> authentications = [];
       var data = jsonDecode(response.body);
-      print(data);
-      for (var i in data) {
-        authentications.add(Authentication(
-          i['id'] ?? '',
-          i['name'] ?? '',
-          i['email'] ?? '',
-          i['password'] ?? '',
-          i['looking_for_work'] ?? '',
-          i['mobile_number'] ?? '',
-          i['google_token'] ?? '',
-        ));
-      }
-      return authentications;
+
+      return Authentication(
+        data['id'] ?? '',
+        data['name'] ?? '',
+        data['email'] ?? '',
+        data['password'] ?? '',
+        data['looking_for_work'] ?? '',
+        data['mobile_number'] ?? '',
+        data['google_token'] ?? '',
+      );
     } else {
-      throw Exception('Failed to load authentications: ${response.statusCode}');
+      throw Exception(
+          'Failed to load authentication for user : ${response.statusCode}');
     }
   }
 

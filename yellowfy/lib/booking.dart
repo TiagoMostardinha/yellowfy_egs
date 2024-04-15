@@ -8,7 +8,6 @@ class BookingPage extends StatefulWidget {
   final String announcement_id;
 
   @override
-  // ignore: library_private_types_in_public_api
   _BookingPageState createState() => _BookingPageState();
 }
 

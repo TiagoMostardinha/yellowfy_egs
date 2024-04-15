@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yellowfy/announcements.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  @override
+  State<LoginPage> createState() => LoginPageState();
+}
 
-  // Function to handle login with Yellowfy
-  void _loginYellowfy(BuildContext context) async {
-    final Uri url = Uri.parse('http://10.0.2.2:5000');
-    try {
-      if (await canLaunch(url.toString())) {
-        await launch(url.toString());
-      } else {
-        throw 'Could not launch $url';
-      }
-    } catch (e) {
-      print('Error launching URL: $e');
-    }
-  }
+class LoginPageState extends State<LoginPage> {
+  final _url = 'http://10.0.2.2:5000/';
+  final _storage = FlutterSecureStorage();
+  late WebViewController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -27,55 +22,37 @@ class LoginPage extends StatelessWidget {
           'YellowFy',
           style: TextStyle(
             color: Colors.black,
-            fontFamily: 'Montserrat', // Specify your desired font here
-            fontSize: 24, // Adjust font size as needed
+            fontFamily: 'Montserrat',
+            fontSize: 24,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.yellowAccent[700],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.yellowAccent[700]!,
-                ),
-                child: const Icon(
-                  Icons.build,
-                  size: 70,
-                  color: Colors.black,
-                ),
+      body: WebView(
+        initialUrl: _url,
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController webViewController) {
+          _controller = webViewController;
+        },
+        navigationDelegate: (NavigationRequest request) {
+          if (request.url.startsWith('_url')) {
+            final token = request.url.split('token=')[1];
+            _storage.write(key: 'token', value: token);
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+        onPageFinished: (String url) {
+          if (url.contains('callback')) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AnnouncementsPage(),
               ),
-              const SizedBox(height: 30.0),
-              GestureDetector(
-                onTap: () => _loginYellowfy(context),
-                child: Container(
-                  width: 200.0,
-                  padding: const EdgeInsets.all(15.0),
-                  decoration: BoxDecoration(
-                    color: Colors.yellowAccent[700],
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Login with Yellowfy',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.yellowAccent[700],
@@ -91,7 +68,6 @@ class LoginPage extends StatelessWidget {
         ],
         onTap: (int index) {
           if (index == 1) {
-            // Navigate to the announcements page
             Navigator.push(
               context,
               MaterialPageRoute(

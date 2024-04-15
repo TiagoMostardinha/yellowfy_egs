@@ -127,7 +127,7 @@ class ContactInfoPage extends StatelessWidget {
           if (index == 0) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
+              MaterialPageRoute(builder: (context) => LoginPage()),
             );
           } else if (index == 1) {
             Navigator.push(

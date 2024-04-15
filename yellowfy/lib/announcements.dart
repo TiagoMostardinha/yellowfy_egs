@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:yellowfy/createAnnouncementPage.dart';
-import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart';
 import 'package:yellowfy/contactspage.dart';
 import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
+import 'package:yellowfy/profile_page.dart';
 
 class AnnouncementsPage extends StatelessWidget {
   const AnnouncementsPage({super.key});
@@ -84,7 +84,7 @@ class AnnouncementsPage extends StatelessWidget {
           if (index == 0) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
+              MaterialPageRoute(builder: (context) => ProfilePage()),
             );
           } else if (index == 1) {
             Navigator.push(

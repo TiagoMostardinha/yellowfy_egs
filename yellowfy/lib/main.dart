@@ -17,9 +17,9 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.yellow,
         ),
-        home: const LoginPage(), // Set LoginPage as the home screen
+        home: LoginPage(), // Set LoginPage as the home screen
         routes: {
-          '/login': (context) => const LoginPage(),
+          '/login': (context) => LoginPage(),
         });
   }
 }
