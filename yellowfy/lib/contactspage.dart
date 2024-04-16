@@ -85,8 +85,10 @@ class ContactInfoPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          BookingPage(announcement_id: announcement_id)),
+                      builder: (context) => BookingPage(
+                            announcement_id: announcement_id,
+                            contractor_id: name,
+                          )),
                 );
               },
               style: TextButton.styleFrom(

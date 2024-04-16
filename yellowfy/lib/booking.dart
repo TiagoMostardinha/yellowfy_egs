@@ -4,8 +4,10 @@ import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/appointment.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key, required this.announcement_id});
+  const BookingPage(
+      {super.key, required this.announcement_id, required this.contractor_id});
   final String announcement_id;
+  final String contractor_id;
 
   @override
   _BookingPageState createState() => _BookingPageState();
@@ -24,12 +26,74 @@ class _BookingPageState extends State<BookingPage> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    _fetchAppointments();
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
       _selectedDate = selectedDay;
     });
+  }
+
+  void _fetchAppointments() async {
+    List<Appointment> appointments = await Handlers().handleGetAppointments();
+    for (Appointment appointment in appointments) {
+      if (appointment.announcement_id == widget.announcement_id &&
+          appointment.contractor_id == widget.contractor_id) {
+        DateTime appointmentDate = DateTime.parse(appointment.date_time);
+        if (!bookedSlots.containsKey(appointmentDate)) {
+          bookedSlots[appointmentDate] = [];
+        }
+        bookedSlots[appointmentDate]!.add(int.parse(appointment.duration));
+      }
+      print(appointment.announcement_id);
+      print(appointment.contractor_id);
+    }
+  }
+
+  Future<void> _bookAppointment() async {
+    Appointment appointment = Appointment(
+      widget.announcement_id,
+      DateTime.now().toIso8601String(),
+      'client_id', //TODO: Dummy client ID
+      widget.contractor_id,
+      _selectedHour.toString(),
+    );
+    try {
+      await Handlers().handlePostAppointment(appointment);
+      _showConfirmationDialog(context, 'Appointment booked successfully!');
+    } catch (e) {
+      print('Error booking appointment: $e');
+      _showConfirmationDialog(context, 'Failed to book appointment.');
+    }
+  }
+
+  Future<void> _showConfirmationDialog(
+      BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Booking Confirmation'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -94,9 +158,8 @@ class _BookingPageState extends State<BookingPage> {
               child: ElevatedButton(
                 onPressed: () {
                   // Handle booking logic here
-                  _showConfirmationDialog(context); // Show confirmation dialog
-                  // print announvement id
-                  print('ola');
+                  _showConfirmationDialog(context,
+                      'Appointment booked successfully!'); // Show confirmation dialog
                 },
                 child: const Text('Book Session'),
               ),
@@ -138,35 +201,6 @@ class _BookingPageState extends State<BookingPage> {
               }).toList(),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showConfirmationDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Booking Confirmation'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Your session has been booked for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} at $_selectedHour:00 with the ${widget.announcement_id} announcement.',
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );
