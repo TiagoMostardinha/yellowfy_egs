@@ -138,3 +138,26 @@ def delete_appointment(appointment_id: int):
     db.delete(appointment)
     db.commit()
     return {"message": "Appointment deleted successfully"}
+
+#endpoint to return appointments by contractor_id
+@app.get("/appointments/contractor/{contractor_id}", response_model=List[Appointment])
+def read_appointments_by_contractor_id(contractor_id: int):
+    db = SessionLocal()
+    return db.query(Appointment).filter(Appointment.contractor_id == contractor_id).all()
+
+#endpoint to get the swagger UI
+@app.get("/docs", response_class=HTMLResponse)
+async def get_docs():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>API Documentation</title>
+    </head>
+    <body>
+    <h1>API Documentation</h1>
+    <p>API documentation can be found at <a href="/docs">/docs</a></p>
+    </body>
+    </html>
+    """
+
