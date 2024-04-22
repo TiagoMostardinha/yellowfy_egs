@@ -87,7 +87,7 @@ class AnnouncementsPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => ProfilePage()),
             );
           } else if (index == 1) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) => const AnnouncementsPage()),

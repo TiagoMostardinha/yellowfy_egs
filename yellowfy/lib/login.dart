@@ -45,7 +45,7 @@ class LoginPageState extends State<LoginPage> {
         },
         onPageFinished: (String url) {
           if (url.contains('callback')) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const AnnouncementsPage(),
@@ -68,7 +68,7 @@ class LoginPageState extends State<LoginPage> {
         ],
         onTap: (int index) {
           if (index == 1) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const AnnouncementsPage(),
