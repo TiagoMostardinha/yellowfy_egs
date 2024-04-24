@@ -1,9 +1,17 @@
-version: '3.8'
+
 
 services:
-  booking:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///./database.db
+
+volumes:
+  app-db:
+
