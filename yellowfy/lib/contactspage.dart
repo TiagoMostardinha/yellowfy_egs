@@ -24,6 +24,7 @@ class ContactInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(name);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Yellow Worker'),

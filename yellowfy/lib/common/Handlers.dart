@@ -93,7 +93,8 @@ class Handlers {
   Future<List<Appointment>> handleGetAppointments() async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/"));
+    final response =
+        await http.get(Uri.parse("http://$url:$port/appointments/"));
     if (response.statusCode == 200) {
       List<Appointment> appointments = [];
       var data = jsonDecode(response.body);
@@ -108,6 +109,31 @@ class Handlers {
         ));
       }
       return appointments;
+    } else {
+      throw Exception('Failed to load appointments: ${response.statusCode}');
+    }
+  }
+
+  // get appointments by contractor id
+
+  Future<Appointment> handleGetPostByCID(String id) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
+    final response =
+        await http.get(Uri.parse("http://$url:$port/appointments/$id"));
+    if (response.statusCode == 200) {
+      Appointment appointment;
+
+      var data = jsonDecode(response.body);
+
+      appointment = Appointment(
+        data['announcement_id'] ?? '',
+        data['date_time'] ?? '',
+        data['client_id'] ?? '',
+        data['contractor_id'] ?? '',
+        data['duration'] ?? '',
+      );
+      return appointment;
     } else {
       throw Exception('Failed to load appointments: ${response.statusCode}');
     }
