@@ -1,4 +1,4 @@
-FROM golang
+FROM golang:1.22-alpine
 
 WORKDIR /app
 
@@ -12,4 +12,4 @@ RUN go build -o api .
 
 EXPOSE 8080
 
-CMD [ "./api" ]
+ENTRYPOINT [ "./api" ]

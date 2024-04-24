@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:yellowfy/common/Handlers.dart';
@@ -47,7 +48,9 @@ class _BookingPageState extends State<BookingPage> {
         bookedSlots[appointmentDate]!.add(int.parse(appointment.duration));
       }
       print(appointment.announcement_id);
-      print(appointment.contractor_id);
+      if (kDebugMode) {
+        print("cona" + appointment.contractor_id);
+      }
     }
   }
 
