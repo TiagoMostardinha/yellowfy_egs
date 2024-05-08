@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:yellowfy/announcements.dart';
-import 'package:yellowfy/contactspage.dart';
-import 'package:yellowfy/common/Handlers.dart';
-import 'package:yellowfy/models/authentication.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -11,39 +7,39 @@ class ProfilePage extends StatefulWidget {
 }
 
 class ProfilePageState extends State<ProfilePage> {
-  late Authentication _auth;
   final storage = FlutterSecureStorage();
   String _fname = "";
-  String _mobile_number = "";
+  String _job = ""; // Assuming you will retrieve the user's job as well
+  String _phoneNumber =
+      ""; // Assuming you will retrieve the user's phone number
+  bool _isLoading = true; // Indicates whether data is being loaded or not
 
   @override
   void initState() {
     super.initState();
-    fetchAuthentication('google_token');
+    // Fetch user data here
+    fetchUserData();
   }
 
-  Future<void> fetchAuthentication(String google_token) async {
-    final String tokenKey = 'token';
-    final String? token = await storage.read(key: tokenKey);
+  Future<void> fetchUserData() async {
+    // Simulating data fetching from storage or API
+    // Replace this with actual data fetching logic
+    await Future.delayed(Duration(seconds: 2));
 
-    if (token != null) {
-      final String url = 'http://127.0.0.1:5000/authentication/$google_token';
-    }
-    try {
-      Authentication auth = await Handlers().handleGetAuthentication();
-      setState(() {
-        _auth = auth;
-      });
-    } catch (e) {
-      print('Erro fetching ID: $e');
-    }
+    setState(() {
+      // Update _fname, _job, and _phoneNumber with fetched data
+      _fname = "Guilherme Claro"; // Example data
+      _job = ""; // Example data
+      _phoneNumber = "964377079"; // Example data
+      _isLoading = false; // Data loading is complete
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'YellowProfile',
           style: TextStyle(
             color: Colors.black,
@@ -54,35 +50,55 @@ class ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
         backgroundColor: Colors.yellowAccent[700],
       ),
-      body:
-          // this is the page where im getting the information when the persons logs in
-          Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 20),
-          const CircleAvatar(
-            radius: 80,
-            backgroundImage: AssetImage('assets/ye.jpg'), // Placeholder photo
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Name',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(), // Loading indicator
+            )
+          : Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(
+                    child: CircleAvatar(
+                      radius: 80,
+                      backgroundImage: AssetImage('assets/images.jpg'),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      _fname,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      _job,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      _phoneNumber,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Job',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 18,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
