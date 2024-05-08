@@ -1,17 +1,29 @@
-
-
 services:
-  app:
+ app:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - mysql
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=sqlite:///./database.db
+      - DATABASE_URL=mysql+pymysql://admin:admin@mysql:3306/booking
+
+ mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'booking'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  app-db:
-
+ mysql_data:
