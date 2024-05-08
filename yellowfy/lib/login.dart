@@ -12,6 +12,7 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   final _url = 'http://10.0.2.2:5000/';
   final _storage = FlutterSecureStorage();
+
   late WebViewController _controller;
 
   @override
@@ -19,7 +20,7 @@ class LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'YellowFy',
+          'Join the Yellow Community!',
           style: TextStyle(
             color: Colors.black,
             fontFamily: 'Montserrat',
