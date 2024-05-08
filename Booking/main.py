@@ -18,7 +18,7 @@ class appointments(SQLModel, table=True):
 mysql_user = 'admin'
 mysql_password = 'admin'
 mysql_host = 'mysql'
-mysql_port = '3306'
+mysql_port = '3307'
 mysql_db = 'booking'
 
 mysql_url = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
