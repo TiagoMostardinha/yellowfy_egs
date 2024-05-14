@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yellowfy/announcements.dart';
@@ -43,16 +44,6 @@ class LoginPageState extends State<LoginPage> {
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
-        },
-        onPageFinished: (String url) {
-          if (url.contains('callback')) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AnnouncementsPage(),
-              ),
-            );
-          }
         },
       ),
     );
