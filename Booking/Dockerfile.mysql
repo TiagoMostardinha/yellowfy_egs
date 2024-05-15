@@ -1,0 +1,10 @@
+# Use the official MySQL image as a parent image
+FROM mysql:latest
+
+# Set the root password
+ENV MYSQL_ROOT_PASSWORD=admin
+
+# Set environment variables (optional)
+ENV MYSQL_DATABASE=booking
+ENV MYSQL_USER=admin
+ENV MYSQL_PASSWORD=admin

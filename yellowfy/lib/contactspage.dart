@@ -38,7 +38,8 @@ class ContactInfoPage extends StatelessWidget {
           const SizedBox(height: 20),
           const CircleAvatar(
             radius: 80,
-            backgroundImage: AssetImage('assets/ye.jpg'), // Placeholder photo
+            backgroundImage:
+                AssetImage('assets/images.jpg'), // Placeholder photo
           ),
           const SizedBox(height: 16),
           Text(

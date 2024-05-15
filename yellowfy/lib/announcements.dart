@@ -48,7 +48,7 @@ class AnnouncementsPage extends StatelessWidget {
                 return _buildAnnouncementCard(
                   name: announcements[index].userId,
                   job: announcements[index].category,
-                  imagePath: 'assets/ye.jpg',
+                  imagePath: 'assets/images.jpg',
                   contactInfo: announcements[index].description,
                   coordinates: "" +
                       announcements[index].coordinates.latitude.toString() +

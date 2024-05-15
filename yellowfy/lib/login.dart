@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yellowfy/announcements.dart';
@@ -12,6 +13,7 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   final _url = 'http://10.0.2.2:5000/';
   final _storage = FlutterSecureStorage();
+
   late WebViewController _controller;
 
   @override
@@ -19,7 +21,7 @@ class LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'YellowFy',
+          'Join the Yellow Community!',
           style: TextStyle(
             color: Colors.black,
             fontFamily: 'Montserrat',
@@ -42,39 +44,6 @@ class LoginPageState extends State<LoginPage> {
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
-        },
-        onPageFinished: (String url) {
-          if (url.contains('callback')) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AnnouncementsPage(),
-              ),
-            );
-          }
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.yellowAccent[700],
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Login',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-        ],
-        onTap: (int index) {
-          if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AnnouncementsPage(),
-              ),
-            );
-          }
         },
       ),
     );
