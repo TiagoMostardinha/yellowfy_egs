@@ -117,6 +117,65 @@ spec:
         ports:
         - containerPort: 3306
 
+# Create app deployment for auth service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking
+  template:
+    metadata:
+      labels:
+        app: booking
+    spec:
+      containers:
+      - name: booking
+        image: registry.deti/egs-yellowfy/booking:v1
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+
+# Create db deployment 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: registry.deti/egs-yellowfy/mysql:v1
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+
 
 
 #Create nginx deployment
@@ -172,6 +231,20 @@ spec:
     targetPort: 8080
   selector:
     app: announcements
+
+# Create Service for auth_app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking
+  namespace: egs-yellowfy
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: booking
 
 
 # Create Service for APP
