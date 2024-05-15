@@ -22,11 +22,11 @@ google = oauth.register(
     redirect_uri='http://0.0.0.0:5000/login/google/callback'
 )
 
-@auth.route('/login')
+@auth.route('/auth/login')
 def login():
     return render_template('login.html')
 
-@auth.route('/login', methods=['POST'])
+@auth.route('/auth/login', methods=['POST'])
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
@@ -45,11 +45,11 @@ def login_post():
 
     return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
-@auth.route('/signup')
+@auth.route('/auth/signup')
 def signup():
     return render_template('signup.html')
 
-@auth.route('/signup', methods=['POST'])
+@auth.route('/auth/signup', methods=['POST'])
 def signup_post():
 
     email = request.form.get('email')
@@ -71,7 +71,7 @@ def signup_post():
 
     return redirect(url_for('auth.login'))
 
-@auth.route('/userinfo')
+@auth.route('/auth/userinfo')
 @jwt_required()
 def userinfo():
     current_user_id = get_jwt_identity()
@@ -87,14 +87,14 @@ def userinfo():
     else:
         return 'User not found', 404
 
-@auth.route('/refresh', methods=['POST'])
+@auth.route('/auth/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     current_user_id = get_jwt_identity()
     access_token = create_access_token(identity=current_user_id, issuer='https://accounts.google.com')
     return {'access_token': access_token}, 200
 
-@auth.route('/login/google')
+@auth.route('/auth/login/google')
 def google_login():
     state = secrets.token_urlsafe(16)
     nonce = secrets.token_urlsafe(16)
@@ -103,7 +103,7 @@ def google_login():
     return google.authorize_redirect(redirect_uri=url_for('auth.google_callback', _external=True),state=state,nonce=nonce)
 
 
-@auth.route('/login/google/callback')
+@auth.route('/auth/login/google/callback')
 def google_callback():
 
     if request.args.get('state') != session.get('oauth_state'):
@@ -144,7 +144,7 @@ def google_callback():
         return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
 
-@auth.route('/additional_info', methods=['POST'])
+@auth.route('/auth/additional_info', methods=['POST'])
 def additional_info():
 
     email = request.form.get('email')
@@ -180,7 +180,7 @@ def additional_info():
     return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
 
-@auth.route('/get_google_token', methods=['POST'])
+@auth.route('/auth/get_google_token', methods=['POST'])
 @jwt_required()
 def get_google_token():
 
@@ -193,7 +193,7 @@ def get_google_token():
     else:
         return 'User not found', 404
 
-@auth.route('/all_users_google_token', methods=['GET'])
+@auth.route('/auth/all_users_google_token', methods=['GET'])
 @jwt_required()
 # return id and google_token of all users
 def all_users_google_token():
@@ -206,7 +206,7 @@ def all_users_google_token():
     
         return jsonify(users_google_token)
 
-@auth.route('/logout')
+@auth.route('/auth/logout')
 @jwt_required()
 def logout():
     logout_user()

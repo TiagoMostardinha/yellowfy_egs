@@ -1,20 +1,54 @@
 version: '3'
 
 services:
-  web:
-    build: ./auth_app
+  reverse-proxy:
+    image: traefik:v2.11
+    command: 
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - traefik_public
+
+  auth:
+    image: registry.deti/egs-yellowfy/auth:v1
     ports:
       - "5000:5000"
     environment:
       DATABASE_URI: "mysql+pymysql://root:root@db:3306/flask_app_db"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=5000"
     depends_on:
       - db
+    networks:
+     - traefik_public
 
   db:
-    build: ./auth_db
+    image: registry.deti/egs-yellowfy/auth_db:v1
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: flask_app_db
     ports:
       - "3306:3306"
+    labels:
+      - "traefik.enable=false" # Disable Traefik for the db service
+    networks:
+      - traefik_public
 
+  # whoami:
+  #   image: traefik/whoami
+  #   labels:
+  #     - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+
+networks:
+  traefik_public:
+    external: true
