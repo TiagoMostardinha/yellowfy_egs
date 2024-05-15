@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: announcements-api  # Match your API container name
+  name: announcements  # Match your API container name
   namespace: egs-yellowfy
 
 spec:
   replicas: 1  # Adjust for desired number of API replicas
   selector:
     matchLabels:
-      app: announcements-api  # Match the label in the pod template
+      app: announcements  # Match the label in the pod template
   template:
     metadata:
       labels:
-        app: announcements-api  # Label for pod selection
+        app: announcements  # Label for pod selection
     spec:
       containers:
-      - name: announcements-api
-        image: registry.deti:5000/egs-yellowfy/announcements-api:v1
+      - name: announcements
+        image: registry.deti:5000/egs-yellowfy/announcements:v0
         ports:
         - containerPort: 8080
       resources:
@@ -26,10 +26,7 @@ spec:
         limits:
           memory: "128Mi"
           cpu: "500mm"
-
 ---
-
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,25 +55,17 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
-      volumes:
-      - name: mongo-data
-        persistentVolumeClaim:
-          claimName: mongo-pvc
 
+# Create Service for auth_app
 ---
-
-# Persistent Volume Claim for MongoDB data (optional)
-# Create a separate Persistent Volume (PV) object based on your storage needs
-# This YAML snippet is just an example
-# persistentVolumeClaim.yaml
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: mongo-pvc
-# spec:
-#   accessModes:
-#     - ReadWriteOnce
-#   resources:
-#     requests:
-#       storage: 1Gi
-#   storageClassName: your-storage-class  # Replace with your storage class
+apiVersion: v1
+kind: Service
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: announcements
