@@ -27,34 +27,8 @@ spec:
         ports:
         - containerPort: 5000
 
-#Create nginx deployment
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nginx
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-        - image: registry.deti/egs-yellowfy/nginx:v1
-          name: nginx
-          ports:
-            - containerPorautht: 80
-          resources: {}
-      restartPolicy: Always
-
-
 # Create db deployment 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -83,6 +57,94 @@ spec:
         ports:
         - containerPort: 3306
 
+# Create app deployment for auth service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: announcements
+  template:
+    metadata:
+      labels:
+        app: announcements
+    spec:
+      containers:
+      - name: announcements
+        image: registry.deti/egs-yellowfy/announcements:v1
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+
+# Create db deployment 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+
+
+
+#Create nginx deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: registry.deti/egs-yellowfy/nginx:v1
+          name: nginx
+          ports:
+            - containerPorautht: 80
+          resources: {}
+      restartPolicy: Always
+
 # Create Service for auth_app
 ---
 apiVersion: v1
@@ -96,6 +158,21 @@ spec:
     targetPort: 5000
   selector:
     app: auth
+
+# Create Service for auth_app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: announcements
+
 
 # Create Service for APP
 ---
