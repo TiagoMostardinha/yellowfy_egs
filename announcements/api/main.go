@@ -18,7 +18,7 @@ import (
 // @description	This is the API for the announcements service in GO with Gin Framework.
 
 // @host	localhost:8080
-// @BasePath	/v0
+// @BasePath	/v1
 
 var AnnouncementDB Database
 
@@ -60,15 +60,15 @@ func main() {
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// create version 0 for router
-	v0Router := router.Group("/v0")
+	v1Router := router.Group("/v1")
 
 	// all endpoints present on the api
-	v0Router.GET("/healthz", handleReadiness)
-	v0Router.GET("/", handleGetAnnouncemnts)
-	v0Router.GET("/:id", handleGetAnnouncementsByID)
-	v0Router.POST("/", handleCreateAnnouncement)
-	v0Router.DELETE("/:id", handleDeleteAnnouncement)
-	v0Router.PUT("/:id", handleUpdateAnnouncemnt)
+	v1Router.GET("/healthz", handleReadiness)
+	v1Router.GET("/", handleGetAnnouncemnts)
+	v1Router.GET("/:id", handleGetAnnouncementsByID)
+	v1Router.POST("/", handleCreateAnnouncement)
+	v1Router.DELETE("/:id", handleDeleteAnnouncement)
+	v1Router.PUT("/:id", handleUpdateAnnouncemnt)
 
 	err = router.Run(":" + port)
 	if err != nil {
