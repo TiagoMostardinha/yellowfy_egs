@@ -17,6 +17,12 @@ spec:
       containers:
       - name: auth
         image: registry.deti/egs-yellowfy/auth:v1
+        env:
+        - name: DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: db-uri-secret
+              key: sqlalchemy_database_uri
         resources:
           requests:
             memory: "32Mi"
@@ -49,10 +55,9 @@ spec:
         - image: registry.deti/egs-yellowfy/nginx:v1
           name: nginx
           ports:
-            - containerPorautht: 80
+            - containerPort: 80
           resources: {}
       restartPolicy: Always
-
 
 # Create db deployment 
 apiVersion: apps/v1
@@ -72,16 +77,53 @@ spec:
     spec:
       containers:
       - name: auth-db
-        image: registry.deti/egs-yellowfy/auth_db:v1
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-password
+              key: password
+        volumeMounts:
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
         resources:
           requests:
-            memory: "32Mi"
-            cpu: "10m"
+            memory: "512Mi"   
+            cpu: "250m"       
           limits:
-            memory: "128Mi"
-            cpu: "500m"
+            memory: "1Gi"     
+            cpu: "500m"       
         ports:
         - containerPort: 3306
+      volumes:
+      - name: init-script
+        configMap:
+          name: mysql-init-script
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-db
+  namespace: egs-yellowfy
+spec:
+  selector:
+    app: auth-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+    
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-uri-secret
+  namespace: egs-yellowfy
+type: Opaque
+data:
+  sqlalchemy_database_uri: bXlzcWwrcHlteXNxbDovL3Jvb3Q6cm9vdEBhdXRoLWRiOjMzMDYvZmxhc2tfYXBwX2Ri
 
 # Create Service for auth_app
 ---
@@ -111,6 +153,16 @@ spec:
   selector:
     app: nginx
 
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-root-password
+  namespace: egs-yellowfy
+type: Opaque
+data:
+  password: cm9vdA==   # Base64 encoded value of 'root'
+
 # Configure Traefik
 ---
 apiVersion: networking.k8s.io/v1
@@ -135,3 +187,19 @@ spec:
             name: nginx
             port: 
               number: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: egs-yellowfy
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS flask_app_db;
+
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';
+    CREATE USER 'yellowfy'@'localhost' IDENTIFIED BY 'yellowfy';
+    GRANT ALL PRIVILEGES ON flask_app_db.* TO 'yellowfy'@'localhost';
+    FLUSH PRIVILEGES;
+
