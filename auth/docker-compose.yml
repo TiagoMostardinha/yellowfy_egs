@@ -18,7 +18,8 @@ services:
       - traefik_public
 
   auth:
-    image: registry.deti/egs-yellowfy/auth:v1
+    #image: registry.deti/egs-yellowfy/auth:v1
+    image: auth
     ports:
       - "5000:5000"
     environment:
@@ -33,7 +34,8 @@ services:
      - traefik_public
 
   db:
-    image: registry.deti/egs-yellowfy/auth_db:v1
+    #image: registry.deti/egs-yellowfy/auth_db:v1
+    image: auth_db
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: flask_app_db
