@@ -1,22 +1,30 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yellowfy/announcements.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:yellowfy/announcements.dart';
+import 'package:yellowfy/map.dart';
 
-class LoginPage extends StatefulWidget {
-  @override
-  State<LoginPage> createState() => LoginPageState();
-}
-
-class LoginPageState extends State<LoginPage> {
-  final _url = 'http://10.0.2.2:5000/';
+class LoginPage extends StatelessWidget {
+  final String _loginUrl =
+      'http://localhost:5000/'; // Replace with your actual login URL
   final _storage = FlutterSecureStorage();
 
-  late WebViewController _controller;
+  Future<void> _launchURL() async {
+    final Uri loginUri = Uri.parse(_loginUrl);
+    final Uri callbackUri = Uri.parse(
+        'http://localhost:5000/callback'); // Replace with your actual callback URL
+
+    // Listen for URL changes
+    _urlListener(callbackUri);
+
+    if (await canLaunch(loginUri.toString())) {
+      await launch(loginUri.toString());
+    } else {
+      throw 'Could not launch $_loginUrl';
+    }
+  }
+
+  void _urlListener(Uri callbackUri) async {}
 
   @override
   Widget build(BuildContext context) {
@@ -33,75 +41,74 @@ class LoginPageState extends State<LoginPage> {
         centerTitle: true,
         backgroundColor: Colors.yellowAccent[700],
       ),
-      body: WebView(
-          initialUrl: _url,
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller = webViewController;
-          },
-          onPageFinished: (url) async {
-            if (url != null && url.contains("callback")) {
-              final statusPage = await _controller.currentUrl();
-              if (statusPage != null && statusPage.contains("error")) {
-                Navigator.of(context).pop();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Login failed. Please try again.',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    duration: Duration(seconds: 5),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Your trusted platform for hiring professional contractors. '
+                'Connect with experienced and reliable contractors for all your project needs. '
+                'Join our community and make your projects come to life!',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: _launchURL,
+                child: const Text('Go to Login Page'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellowAccent[700],
+                  foregroundColor: Colors.black,
+                  textStyle: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 16,
                   ),
-                );
-              } else {
-                final jsonString = await _controller
-                    .runJavascriptReturningResult('document.body.innerText');
-                final jsonData = jsonDecode(jsonString);
-
-                final res = jsonData.toString();
-                final out = res.split(" ");
-                final token = out[3]
-                    .replaceAll('"', '')
-                    .replaceAll('}', '')
-                    .replaceAll('\n', '');
-                debugPrint("Token -> " + token, wrapWidth: 1024);
-                await _storage.write(key: 'token', value: token);
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => AnnouncementsPage(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 15,
                   ),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Login successful!',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    duration: Duration(seconds: 5),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                final String url = 'http://10.0.2.2:5000/additional_info';
-                final Map<String, String> headers = {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'x-access-token': token,
-                };
-                final response =
-                    await http.post(Uri.parse(url), headers: headers);
-
-                if (response.statusCode == 200) {
-                  debugPrint("User logged in successfully", wrapWidth: 1024);
-                } else {
-                  debugPrint("User login failed : ${response.statusCode}",
-                      wrapWidth: 1024);
-                }
-              }
-            }
-          }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.yellowAccent[700],
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.announcement),
+            label: 'Announcements',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Finder',
+          ),
+        ],
+        onTap: (index) {
+          // Handle bottom navigation bar taps here
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const AnnouncementsPage()),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MapPage()),
+            );
+          }
+        },
+      ),
     );
   }
 }

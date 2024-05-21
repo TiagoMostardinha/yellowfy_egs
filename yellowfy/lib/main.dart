@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'login.dart';
+import 'package:yellowfy/announcements.dart';
+import 'package:yellowfy/login.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.yellow,
         ),
-        home: LoginPage(), // Set LoginPage as the home screen
+        home: LoginPage(),
         routes: {
           '/login': (context) => LoginPage(),
         });

@@ -65,8 +65,11 @@ flutter {
 }
 android {                                                                                     
    defaultConfig {                                                                             
-     minSdkVersion 21        
-     manifestPlaceholders = [auth0Domain: "YOUR_AUTH0_DOMAIN", auth0Scheme: "https"]                                                               
+     minSdkVersion 23     
+     manifestPlaceholders =  [
+         appAuthRedirectScheme: 'com.example.yellowfy',
+         applicationName: "com.example.yellowfy.Application"
+     ]                                                              
    }                                                                                           
  }   
  
