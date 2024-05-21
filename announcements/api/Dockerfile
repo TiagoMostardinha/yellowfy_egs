@@ -10,6 +10,6 @@ RUN go mod tidy
 
 RUN go build -o api .
 
-EXPOSE 8080
+EXPOSE 9000
 
 ENTRYPOINT [ "./api" ]

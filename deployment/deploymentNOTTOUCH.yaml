@@ -60,7 +60,6 @@ spec:
       restartPolicy: Always
 
 # Create db deployment 
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -126,127 +125,6 @@ type: Opaque
 data:
   sqlalchemy_database_uri: bXlzcWwrcHlteXNxbDovL3Jvb3Q6cm9vdEBhdXRoLWRiOjMzMDYvZmxhc2tfYXBwX2Ri
 
-# Create app deployment for auth service
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: announcements
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: announcements
-  template:
-    metadata:
-      labels:
-        app: announcements
-    spec:
-      containers:
-      - name: announcements
-        image: registry.deti/egs-yellowfy/announcements:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8080
-
-# Create db deployment 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mongodb
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongodb
-  template:
-    metadata:
-      labels:
-        app: mongodb
-    spec:
-      containers:
-      - name: mongodb
-        image: mongo:latest
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 3306
-
-# Create app deployment for auth service
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: booking
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: booking
-  template:
-    metadata:
-      labels:
-        app: booking
-    spec:
-      containers:
-      - name: booking
-        image: registry.deti/egs-yellowfy/booking:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8000
-
-# Create db deployment 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - name: mysql
-        image: registry.deti/egs-yellowfy/mysql:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 3306
-
-
-
 # Create Service for auth_app
 ---
 apiVersion: v1
@@ -261,34 +139,19 @@ spec:
   selector:
     app: auth
 
-# Create Service for auth_app
+# Create Service for APP
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: announcements
+  name: nginx
   namespace: egs-yellowfy
 spec:
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 80
+    targetPort: 80
   selector:
-    app: announcements
-
-# Create Service for auth_app
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: booking
-  namespace: egs-yellowfy
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    app: booking
-
+    app: nginx
 
 ---
 apiVersion: v1
