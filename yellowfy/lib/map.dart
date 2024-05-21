@@ -11,39 +11,37 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   GoogleMapController? mapController;
-  LatLng? currentLocation;
   Set<Marker> markers = {};
+
+  // Replace this with your actual list of announcement locations
+  List<String> announcementLocations = [
+    '40.1234 -8.5678', // Example format: latitude longitude
+    // Add more announcement locations as needed
+  ];
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _setMarkers();
   }
 
-  // Define an initial camera position
-  static const LatLng _center = const LatLng(40.6360, -8.6532);
-
-  Future<Position> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied.');
-      }
-    }
-    return await Geolocator.getCurrentPosition();
+  void _setMarkers() {
+    setState(() {
+      markers = _buildMarkers(announcementLocations);
+    });
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  Set<Marker> _buildMarkers(List<String> locations) {
+    return locations.map((location) {
+      var latLng = location.split(' ');
+      double lat = double.parse(latLng[0]);
+      double lng = double.parse(latLng[1]);
+      return Marker(
+        markerId: MarkerId(location),
+        position: LatLng(lat, lng),
+      );
+    }).toSet();
   }
-
-  // Add a variable to store the selected job type
-  String _selectedJobType = 'All Jobs';
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +51,9 @@ class _MapPageState extends State<MapPage> {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
         actions: [
-          // Add a PopupMenuButton for the filter
           PopupMenuButton<String>(
             icon: Icon(Icons.filter_list),
             onSelected: (String value) {
-              setState(() {
-                _selectedJobType = value;
-              });
               // Perform filtering based on the selected job type
               // Update the map markers accordingly
             },
@@ -85,26 +79,16 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       body: GoogleMap(
-        onMapCreated: _onMapCreated,
+        onMapCreated: (GoogleMapController controller) {
+          mapController = controller;
+        },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         initialCameraPosition: const CameraPosition(
-          target: _center,
+          target: LatLng(40.6360, -8.6532),
           zoom: 11.0,
         ),
         markers: markers,
-        /*
-        circles: {
-          Circle(
-            circleId: CircleId('1'),
-            center: _center,
-            radius: 1000,
-            fillColor: Colors.blue.withOpacity(0.1),
-            strokeWidth: 1,
-            strokeColor: Colors.blue,
-          ),
-        },
-        */
       ),
     );
   }
