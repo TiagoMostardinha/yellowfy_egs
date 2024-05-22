@@ -1,4 +1,5 @@
 # Create app deployment for auth service
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,25 +16,128 @@ spec:
         app: auth
     spec:
       containers:
-      - name: auth
-        image: registry.deti/egs-yellowfy/auth:v1
-        env:
-        - name: DATABASE_URI
-          valueFrom:
-            secretKeyRef:
-              name: db-uri-secret
-              key: sqlalchemy_database_uri
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 5000
+        - name: auth
+          image: registry.deti/egs-yellowfy/auth:v1
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: db-uri-secret
+                  key: sqlalchemy_database_uri
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 5000
 
-#Create nginx deployment
+# Create db deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-db
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-db
+  template:
+    metadata:
+      labels:
+        app: auth-db
+    spec:
+      containers:
+        - name: auth-db
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-root-password
+                  key: password
+          volumeMounts:
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3306
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-init-script
+
+# Create app deployment for announcements service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: announcements
+  template:
+    metadata:
+      labels:
+        app: announcements
+    spec:
+      containers:
+        - name: announcements
+          image: registry.deti/egs-yellowfy/announcements:v1
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 9000
+
+# Create mongodb deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 27017
+
+# Create nginx deployment
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,49 +163,7 @@ spec:
           resources: {}
       restartPolicy: Always
 
-# Create db deployment 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: auth-db
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: auth-db
-  template:
-    metadata:
-      labels:
-        app: auth-db
-    spec:
-      containers:
-      - name: auth-db
-        image: mysql:latest
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-root-password
-              key: password
-        volumeMounts:
-        - name: init-script
-          mountPath: /docker-entrypoint-initdb.d
-        resources:
-          requests:
-            memory: "512Mi"   
-            cpu: "250m"       
-          limits:
-            memory: "1Gi"     
-            cpu: "500m"       
-        ports:
-        - containerPort: 3306
-      volumes:
-      - name: init-script
-        configMap:
-          name: mysql-init-script
-
+# Create Service for auth-db
 ---
 apiVersion: v1
 kind: Service
@@ -115,7 +177,8 @@ spec:
     - protocol: TCP
       port: 3306
       targetPort: 3306
-    
+
+# Create Secrets for auth-db
 ---
 apiVersion: v1
 kind: Secret
@@ -126,128 +189,7 @@ type: Opaque
 data:
   sqlalchemy_database_uri: bXlzcWwrcHlteXNxbDovL3Jvb3Q6cm9vdEBhdXRoLWRiOjMzMDYvZmxhc2tfYXBwX2Ri
 
-# Create app deployment for auth service
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: announcements
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: announcements
-  template:
-    metadata:
-      labels:
-        app: announcements
-    spec:
-      containers:
-      - name: announcements
-        image: registry.deti/egs-yellowfy/announcements:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8080
-
-# Create db deployment 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mongodb
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongodb
-  template:
-    metadata:
-      labels:
-        app: mongodb
-    spec:
-      containers:
-      - name: mongodb
-        image: mongo:latest
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 3306
-
-# Create app deployment for auth service
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: booking
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: booking
-  template:
-    metadata:
-      labels:
-        app: booking
-    spec:
-      containers:
-      - name: booking
-        image: registry.deti/egs-yellowfy/booking:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8000
-
-# Create db deployment 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-  namespace: egs-yellowfy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - name: mysql
-        image: registry.deti/egs-yellowfy/mysql:v1
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "10m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 3306
-
-
-
-# Create Service for auth_app
+# Create Service for auth
 ---
 apiVersion: v1
 kind: Service
@@ -256,40 +198,12 @@ metadata:
   namespace: egs-yellowfy
 spec:
   ports:
-  - port: 5000
-    targetPort: 5000
+    - port: 5000
+      targetPort: 5000
   selector:
     app: auth
 
-# Create Service for auth_app
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: announcements
-  namespace: egs-yellowfy
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    app: announcements
-
-# Create Service for auth_app
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: booking
-  namespace: egs-yellowfy
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    app: booking
-
-
+# Create Secrets for auth
 ---
 apiVersion: v1
 kind: Secret
@@ -298,33 +212,52 @@ metadata:
   namespace: egs-yellowfy
 type: Opaque
 data:
-  password: cm9vdA==   # Base64 encoded value of 'root'
+  password: cm9vdA== # Base64 encoded value of 'root'
 
-# Configure Traefik
+# Create Service for mongodb
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
-  name: app-k3s
+  name: mongodb
   namespace: egs-yellowfy
-  annotations:
-    kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
-    traefik.ingress.kubernetes.io/redirect-entry-point: https
-    traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
-  rules:
-  - host: egs-yellowfy.deti
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx
-            port: 
-              number: 80
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
 
+# Create Service for announcements
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app: announcements
+
+# Create Service for nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: egs-yellowfy
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: nginx
+
+# Create ConfigMap for auth-db
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -340,3 +273,28 @@ data:
     GRANT ALL PRIVILEGES ON flask_app_db.* TO 'yellowfy'@'localhost';
     FLUSH PRIVILEGES;
 
+
+# Configure Traefik
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-k3s
+  namespace: egs-yellowfy
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  rules:
+    - host: egs-yellowfy.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80

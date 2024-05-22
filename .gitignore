@@ -2,3 +2,4 @@ announcements/api/api
 announcements/api/vendor/
 announcements/db/
 Booking/pycache/
+.idea/

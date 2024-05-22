@@ -310,9 +310,9 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.1",
-	Host:             "localhost:8080",
-	BasePath:         "/v0",
+	Version:          "1.0",
+	Host:             "egs-yellowfy.com/announcements",
+	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Announcements service API",
 	Description:      "This is the API for the announcements service in GO with Gin Framework.",

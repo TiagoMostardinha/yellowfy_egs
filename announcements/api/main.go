@@ -14,10 +14,10 @@ import (
 )
 
 // @title	Announcements service API
-// @version	0.1
+// @version	1.0
 // @description	This is the API for the announcements service in GO with Gin Framework.
 
-// @host	localhost:8080
+// @host	egs-yellowfy.com/announcements
 // @BasePath	/v1
 
 var AnnouncementDB Database
@@ -60,8 +60,6 @@ func main() {
 
 	// adds swagger documentation
 	announcementsRouter.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-
 
 	// create version 0 for router
 	v1Router := announcementsRouter.Group("/v1")
