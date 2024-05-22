@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:yellowfy/announcements.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -87,7 +86,7 @@ class LoginPageState extends State<LoginPage> {
                     backgroundColor: Colors.green,
                   ),
                 );
-                final String url = 'http://10.0.2.2:5000/additional_info';
+                final String url = 'http://10.0.2.2:5000/auth/login';
                 final Map<String, String> headers = {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
