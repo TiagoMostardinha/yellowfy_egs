@@ -56,11 +56,15 @@ func main() {
 	// create a new Router
 	router := gin.Default()
 
+	announcementsRouter := router.Group("/announcements")
+
 	// adds swagger documentation
-	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	announcementsRouter.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+
 
 	// create version 0 for router
-	v1Router := router.Group("/v1")
+	v1Router := announcementsRouter.Group("/v1")
 
 	// all endpoints present on the api
 	v1Router.GET("/healthz", handleReadiness)
