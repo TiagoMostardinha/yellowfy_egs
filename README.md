@@ -32,6 +32,6 @@ go build
 ```go
 ./api
 ```
-- To access the documentation of announcements API go to the browser and access http://localhost:8080/docs
+- To access the documentation of announcements API go to the browser and access http://localhost:9000/docs
 ---
 ---

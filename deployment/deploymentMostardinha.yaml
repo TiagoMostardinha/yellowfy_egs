@@ -1,0 +1,151 @@
+# Create app deployment for auth service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: announcements
+  template:
+    metadata:
+      labels:
+        app: announcements
+    spec:
+      containers:
+        - name: announcements
+          image: registry.deti/egs-yellowfy/announcements:v6
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 9000
+
+# Create db deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 27017
+
+#Create nginx deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: registry.deti/egs-yellowfy/nginx:v2
+          name: nginx
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: egs-yellowfy
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+# Create Service for auth_app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: announcements
+  namespace: egs-yellowfy
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app: announcements
+
+# Create Service for APP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: egs-yellowfy
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: nginx
+
+# Configure Traefik
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-k3s
+  namespace: egs-yellowfy
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  rules:
+    - host: egs-yellowfy.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80

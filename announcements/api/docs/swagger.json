@@ -4,10 +4,10 @@
         "description": "This is the API for the announcements service in GO with Gin Framework.",
         "title": "Announcements service API",
         "contact": {},
-        "version": "0.1"
+        "version": "1.0"
     },
-    "host": "localhost:8080",
-    "basePath": "/v0",
+    "host": "egs-yellowfy.com/announcements",
+    "basePath": "/v1",
     "paths": {
         "/": {
             "get": {

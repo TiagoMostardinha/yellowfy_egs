@@ -1,4 +1,4 @@
-basePath: /v0
+basePath: /v1
 definitions:
   models.APIError:
     properties:
@@ -34,12 +34,12 @@ definitions:
       long:
         type: number
     type: object
-host: localhost:8080
+host: egs-yellowfy.com/announcements
 info:
   contact: {}
   description: This is the API for the announcements service in GO with Gin Framework.
   title: Announcements service API
-  version: "0.1"
+  version: "1.0"
 paths:
   /:
     get:
