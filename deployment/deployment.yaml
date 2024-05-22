@@ -1,5 +1,3 @@
-# Create app deployment for auth service
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,9 +13,15 @@ spec:
       labels:
         app: auth
     spec:
+      initContainers:
+        - name: init-resolv
+          image: busybox
+          command: ["sh", "-c", "echo -e 'search egs-yellowfy.svc.cluster.local svc.cluster.local cluster.local deti\nnameserver 10.43.0.10\noptions ndots:1' | tee /etc/resolv.conf"]
+          securityContext:
+            privileged: true
       containers:
         - name: auth
-          image: registry.deti/egs-yellowfy/auth:v1
+          image: registry.deti/egs-yellowfy/auth:v8
           env:
             - name: DATABASE_URI
               valueFrom:
@@ -96,7 +100,7 @@ spec:
     spec:
       containers:
         - name: announcements
-          image: registry.deti/egs-yellowfy/announcements:v1
+          image: registry.deti/egs-yellowfy/announcements:v7
           resources:
             requests:
               memory: "32Mi"
