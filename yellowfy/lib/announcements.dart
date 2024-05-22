@@ -30,6 +30,15 @@ class AnnouncementsPage extends StatelessWidget {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.filter),
+            onPressed: () {
+              // i need to filtr the announcements by job
+              
+
+              // Navigate to the announcement creation page
+            },
+          )
         ],
       ),
       body: FutureBuilder<List<Announcement>>(

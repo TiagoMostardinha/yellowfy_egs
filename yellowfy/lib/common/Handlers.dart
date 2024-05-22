@@ -12,7 +12,7 @@ class Handlers {
   Future<List<Announcement>> handleGetAnnouncements() async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v0/"));
+    final response = await http.get(Uri.parse("http://$url:$port/v1/"));
     if (response.statusCode == 200) {
       List<Announcement> announcements = [];
       var data = jsonDecode(response.body);
@@ -45,7 +45,7 @@ class Handlers {
   Future<Announcement> handleGetAnnouncementsById(String id) async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v0/$id"));
+    final response = await http.get(Uri.parse("http://$url:$port/v1/$id"));
     if (response.statusCode == 200) {
       Announcement announcement;
       var data = jsonDecode(response.body);
@@ -70,7 +70,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
     final response = await http.post(
-      Uri.parse("http://$url:$port/v0/"),
+      Uri.parse("http://$url:$port/v1/"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

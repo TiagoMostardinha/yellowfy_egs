@@ -18,15 +18,6 @@ RUN apt-get update && apt-get install -y default-mysql-client
 
 RUN pip install cryptography
 
-# Copy the wait-for-mysql.sh script
-COPY wait-for-mysql.sh /usr/local/bin/wait-for-mysql.sh
-
-# Make the script executable
-RUN chmod +x /usr/local/bin/wait-for-mysql.sh
-
-# Define entrypoint script
-ENTRYPOINT ["/usr/local/bin/wait-for-mysql.sh"]
-
 # Expose port 8000 to allow outside access
 EXPOSE 8000
 

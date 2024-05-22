@@ -18,7 +18,7 @@ class appointments(SQLModel, table=True):
 mysql_user = 'admin'
 mysql_password = 'admin'
 mysql_host = 'mysql'
-mysql_port = '3307'
+mysql_port = '3306'
 mysql_db = 'booking'
 
 mysql_url = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
@@ -26,6 +26,11 @@ mysql_url = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_
 
 # Create FastAPI app
 app = FastAPI()
+#wait for the database to be ready
+import time
+#wait for 3mins
+print("Waiting for the database to be ready")
+time.sleep(60)
 
 engine = create_engine(mysql_url, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
