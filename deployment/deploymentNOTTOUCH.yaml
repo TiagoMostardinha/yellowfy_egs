@@ -60,6 +60,7 @@ spec:
       restartPolicy: Always
 
 # Create db deployment 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
