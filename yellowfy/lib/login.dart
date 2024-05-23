@@ -66,7 +66,8 @@ class LoginPageState extends State<LoginPage> {
                 final token = out[3]
                     .replaceAll('"', '')
                     .replaceAll('}', '')
-                    .replaceAll('\n', '');
+                    .replaceAll('\n', '')
+                    .replaceAll('refreshToken', '');
                 debugPrint("Token -> " + token, wrapWidth: 1024);
                 await _storage.write(key: 'token', value: token);
                 Navigator.of(context).pop();
