@@ -311,7 +311,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "egs-yellowfy.com/announcements",
+	Host:             "grupo6-egs-deti.ua.pt/announcements",
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Announcements service API",

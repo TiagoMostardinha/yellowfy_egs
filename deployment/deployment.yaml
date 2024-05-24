@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: registry.deti/egs-yellowfy/auth:v1
+          image: registry.deti/egs-yellowfy/auth:v8
           env:
             - name: DATABASE_URI
               valueFrom:
@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: announcements
-          image: registry.deti/egs-yellowfy/announcements:v1
+          image: registry.deti/egs-yellowfy/announcements:v11
           resources:
             requests:
               memory: "32Mi"
@@ -156,7 +156,7 @@ spec:
         app: nginx
     spec:
       containers:
-        - image: registry.deti/egs-yellowfy/nginx:v1
+        - image: registry.deti/egs-yellowfy/nginx:v3
           name: nginx
           ports:
             - containerPort: 80
@@ -288,7 +288,7 @@ metadata:
     traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
   rules:
-    - host: egs-yellowfy.com
+    - host: grupo6-egs-deti.ua.pt
       http:
         paths:
           - path: /

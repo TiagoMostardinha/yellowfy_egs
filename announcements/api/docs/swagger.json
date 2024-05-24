@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "egs-yellowfy.com/announcements",
+    "host": "grupo6-egs-deti.ua.pt/announcements",
     "basePath": "/v1",
     "paths": {
         "/": {

@@ -17,7 +17,7 @@ import (
 // @version	1.0
 // @description	This is the API for the announcements service in GO with Gin Framework.
 
-// @host	egs-yellowfy.com/announcements
+// @host	grupo6-egs-deti.ua.pt/announcements
 // @BasePath	/v1
 
 var AnnouncementDB Database
