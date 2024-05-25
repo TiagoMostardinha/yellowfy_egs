@@ -13,7 +13,7 @@ class CreateAnnouncementPage extends StatelessWidget {
     TextEditingController latitudeController = TextEditingController();
     TextEditingController longitudeController = TextEditingController();
 
-    Future<void> handlePostAnnouncement(BuildContext context) async {
+    Future<void> postAnnouncement(BuildContext context) async {
       Announcement announcement = Announcement(
         userId: userIdController.text,
         category: categoryController.text,
@@ -26,54 +26,55 @@ class CreateAnnouncementPage extends StatelessWidget {
       );
 
       try {
-        await handlePostAnnouncement(announcement as BuildContext);
-        // Navigate back to the announcements page
+        await Handlers().handlePostAnnouncement(announcement);
         Navigator.pop(context);
       } catch (e) {
         print('Error posting announcement: $e');
-        // Handle error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error posting announcement: $e')),
+        );
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Announcement'),
+        title: const Text('Create Announcement'),
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
               controller: userIdController,
-              decoration: InputDecoration(labelText: 'User ID'),
+              decoration: const InputDecoration(labelText: 'User ID'),
             ),
             TextFormField(
               controller: categoryController,
-              decoration: InputDecoration(labelText: 'Category'),
+              decoration: const InputDecoration(labelText: 'Category'),
             ),
             TextFormField(
               controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Description'),
             ),
             TextFormField(
               controller: latitudeController,
-              decoration: InputDecoration(labelText: 'Latitude'),
+              decoration: const InputDecoration(labelText: 'Latitude'),
               keyboardType: TextInputType.number,
             ),
             TextFormField(
               controller: longitudeController,
-              decoration: InputDecoration(labelText: 'Longitude'),
+              decoration: const InputDecoration(labelText: 'Longitude'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                handlePostAnnouncement(context);
+                postAnnouncement(context);
               },
-              child: Text('Create Announcement'),
+              child: const Text('Create Announcement'),
             ),
           ],
         ),

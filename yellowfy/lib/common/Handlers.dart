@@ -12,18 +12,18 @@ class Handlers {
   Future<List<Announcement>> handleGetAnnouncements() async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v0/"));
+    final response = await http.get(Uri.parse("http://$url/announcements/v1"));
     if (response.statusCode == 200) {
       List<Announcement> announcements = [];
       var data = jsonDecode(response.body);
-      print(data);
+      if (data == null) return announcements;
       for (var i in data) {
         var id = i['Id'] ?? '';
         var userId = i['userID'] ?? '';
         var category = i['category'] ?? '';
         var description = i['description'] ?? '';
-        var latitude = (i['location']['lat'] ?? '') ?? 0.0;
-        var longitude = ((i['location']['long'] ?? '') ?? 0.0);
+        var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
+        var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
 
         announcements.add(Announcement(
           id: id,
@@ -45,7 +45,8 @@ class Handlers {
   Future<Announcement> handleGetAnnouncementsById(String id) async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v0/$id"));
+    final response =
+        await http.get(Uri.parse("http://$url/announcements/v1/$id"));
     if (response.statusCode == 200) {
       Announcement announcement;
       var data = jsonDecode(response.body);
@@ -70,7 +71,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
     final response = await http.post(
-      Uri.parse("http://$url:$port/v0/"),
+      Uri.parse("http://$url/announcements/v1/"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

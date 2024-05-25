@@ -34,9 +34,6 @@ class AnnouncementsPage extends StatelessWidget {
             icon: const Icon(Icons.filter),
             onPressed: () {
               // i need to filtr the announcements by job
-              
-
-              // Navigate to the announcement creation page
             },
           )
         ],
@@ -50,6 +47,10 @@ class AnnouncementsPage extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             List<Announcement>? announcements = snapshot.data;
+
+            if (announcements == null || announcements.isEmpty) {
+              return const Center(child: Text('No announcements found'));
+            }
             return ListView.builder(
               scrollDirection: Axis.vertical,
               itemCount: announcements!.length,
