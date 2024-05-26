@@ -13,6 +13,7 @@ class _MapPageState extends State<MapPage> {
   GoogleMapController? mapController;
   LatLng? currentLocation;
   Set<Marker> markers = {};
+  double _radius = 1000; // Initial radius in meters
 
   @override
   void initState() {
@@ -20,10 +21,9 @@ class _MapPageState extends State<MapPage> {
     _getCurrentLocation();
   }
 
-  // Define an initial camera position
   static const LatLng _center = const LatLng(40.6360, -8.6532);
 
-  Future<Position> _getCurrentLocation() async {
+  Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
@@ -35,14 +35,20 @@ class _MapPageState extends State<MapPage> {
         return Future.error('Location permissions are denied.');
       }
     }
-    return await Geolocator.getCurrentPosition();
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      currentLocation = LatLng(position.latitude, position.longitude);
+      mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    if (currentLocation != null) {
+      mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+    }
   }
 
-  // Add a variable to store the selected job type
   String _selectedJobType = 'All Jobs';
 
   @override
@@ -53,7 +59,6 @@ class _MapPageState extends State<MapPage> {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
         actions: [
-          // Add a PopupMenuButton for the filter
           PopupMenuButton<String>(
             icon: Icon(Icons.filter_list),
             onSelected: (String value) {
@@ -84,27 +89,59 @@ class _MapPageState extends State<MapPage> {
           ),
         ],
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
-        initialCameraPosition: const CameraPosition(
-          target: _center,
-          zoom: 11.0,
-        ),
-        markers: markers,
-        /*
-        circles: {
-          Circle(
-            circleId: CircleId('1'),
-            center: _center,
-            radius: 1000,
-            fillColor: Colors.blue.withOpacity(0.1),
-            strokeWidth: 1,
-            strokeColor: Colors.blue,
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            initialCameraPosition: const CameraPosition(
+              target: _center,
+              zoom: 11.0,
+            ),
+            markers: markers,
+            circles: currentLocation != null
+                ? {
+                    Circle(
+                      circleId: CircleId('radius_circle'),
+                      center: currentLocation!,
+                      radius: _radius,
+                      fillColor: Colors.blue.withOpacity(0.1),
+                      strokeWidth: 1,
+                      strokeColor: Colors.blue,
+                    ),
+                  }
+                : {},
           ),
-        },
-        */
+          Positioned(
+            bottom: 50,
+            left: 10,
+            right: 10,
+            child: Column(
+              children: [
+                Slider(
+                  value: _radius,
+                  min: 100,
+                  max: 5000,
+                  divisions: 49,
+                  label: '${_radius.round()} meters',
+                  onChanged: (double value) {
+                    setState(() {
+                      _radius = value;
+                    });
+                  },
+                ),
+                Text(
+                  'Search Radius: ${_radius.round()} meters',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

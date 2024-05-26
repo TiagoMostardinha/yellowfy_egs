@@ -69,13 +69,20 @@ class LoginPageState extends State<LoginPage> {
                 // Validate the parsed data
                 if (jsonData['access_token'] != null &&
                     jsonData['refresh_token'] != null) {
-                  final token = jsonData['access_token']
-                      .toString()
-                      .replaceAll('"', '')
-                      .replaceAll('}', '')
-                      .replaceAll('\n', '');
+                  final token = jsonData['access_token'];
                   debugPrint("Token -> " + token, wrapWidth: 1024);
+                  debugPrint("ref -> " + jsonData['refresh_token'],
+                      wrapWidth: 1024);
+
                   await _storage.write(key: 'access_token', value: token);
+                  await _storage.write(
+                      key: 'refresh_token', value: jsonData['refresh_token']);
+
+                  // print whats in the _storage
+                  debugPrint(
+                      "Storage -> " +
+                          await _storage.read(key: 'access_token').toString(),
+                      wrapWidth: 1024);
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
@@ -94,24 +101,24 @@ class LoginPageState extends State<LoginPage> {
                     ),
                   );
 
-                  final String url = 'http://grupo6-egs-deti.ua.pt/auth/login';
-                  final Map<String, String> headers = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'access-token': token,
-                  };
+                  // final String url = 'http://grupo6-egs-deti.ua.pt/auth/login';
+                  // final Map<String, String> headers = {
+                  //   'Content-Type': 'application/json',
+                  //   'Accept': 'application/json',
+                  //   'access-token': token,
+                  // };
 
-                  final response =
-                      await http.post(Uri.parse(url), headers: headers);
-                  debugPrint("Response -> " + response.body, wrapWidth: 1024);
+                  // final response =
+                  //     await http.post(Uri.parse(url), headers: headers);
+                  // debugPrint("Response -> " + response.body, wrapWidth: 1024);
 
-                  if (response.statusCode == 200) {
-                    final responseJson = json.decode(response.body);
-                    debugPrint("User logged in successfully", wrapWidth: 1024);
-                  } else {
-                    debugPrint("User login failed : ${response.statusCode}",
-                        wrapWidth: 1024);
-                  }
+                  // if (response.statusCode == 200) {
+                  //   final responseJson = json.decode(response.body);
+                  //   debugPrint("User logged in successfully", wrapWidth: 1024);
+                  // } else {
+                  //   debugPrint("User login failed : ${response.statusCode}",
+                  //       wrapWidth: 1024);
+                  // }
                 } else {
                   throw Exception("Invalid token data");
                 }

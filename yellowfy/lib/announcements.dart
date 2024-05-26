@@ -5,9 +5,20 @@ import 'package:yellowfy/contactspage.dart';
 import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
 import 'package:yellowfy/profile_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AnnouncementsPage extends StatelessWidget {
-  const AnnouncementsPage({super.key});
+  AnnouncementsPage({super.key});
+
+  final _storage = FlutterSecureStorage();
+
+  Future<void> _getToken() async {
+    String? accessToken = await _storage.read(key: 'access_token');
+    String? refreshToken = await _storage.read(key: 'refresh_token');
+
+    debugPrint("Access Token -> $accessToken");
+    debugPrint("Refresh Token -> $refreshToken");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +110,7 @@ class AnnouncementsPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => AnnouncementsPage()),
             );
           } else if (index == 2) {
             Navigator.push(

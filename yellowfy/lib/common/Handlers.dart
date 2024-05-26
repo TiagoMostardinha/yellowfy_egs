@@ -66,6 +66,38 @@ class Handlers {
       throw Exception('Failed to load announcements: ${response.statusCode}');
     }
   }
+    Future<List<Announcement>> handleGetAnnouncementsByGPS(double radius, double lat, double long) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
+    final response = await http.get(Uri.parse("http://$url/announcements/v1/?radius=$radius&lat=$lat&long=$long"));
+    if (response.statusCode == 200) {
+      List<Announcement> announcements = [];
+      var data = jsonDecode(response.body);
+      if (data == null) return announcements;
+      for (var i in data) {
+        var id = i['Id'] ?? '';
+        var userId = i['userID'] ?? '';
+        var category = i['category'] ?? '';
+        var description = i['description'] ?? '';
+        var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
+        var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
+
+        announcements.add(Announcement(
+          id: id,
+          userId: userId,
+          category: category,
+          description: description,
+          coordinates: Coordinate(
+            latitude: latitude,
+            longitude: longitude,
+          ),
+        ));
+      }
+      return announcements;
+    } else {
+      throw Exception('Failed to load announcements: ${response.statusCode}');
+    }
+  }
 
   Future<void> handlePostAnnouncement(Announcement announcement) async {
     String url = dotenv.get("URL", fallback: "");
@@ -169,7 +201,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
 
-    final response = await http.get(Uri.parse("http://$url:$port/login/"));
+    final response = await http.get(Uri.parse("http://$url/auth/login/"));
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
@@ -181,7 +213,6 @@ class Handlers {
         data['password'] ?? '',
         data['looking_for_work'] ?? '',
         data['mobile_number'] ?? '',
-        data['google_token'] ?? '',
       );
     } else {
       throw Exception(
@@ -203,7 +234,6 @@ class Handlers {
         'password': authentication.password,
         'looking_for_work': authentication.looking_for_work,
         'mobile_number': authentication.mobile_number,
-        'google_token': authentication.google_token,
       }),
     );
     if (response.statusCode != 201) {

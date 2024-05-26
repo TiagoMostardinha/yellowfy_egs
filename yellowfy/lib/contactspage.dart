@@ -136,8 +136,7 @@ class ContactInfoPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => AnnouncementsPage()),
             );
           } else if (index == 2) {
             Navigator.push(

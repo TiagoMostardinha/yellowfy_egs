@@ -22,14 +22,11 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchUserData() async {
-    // Simulating data fetching from storage or API
-    // Replace this with actual data fetching logic
+
     await Future.delayed(Duration(seconds: 2));
 
     setState(() {
-      // Update _fname, _job, and _phoneNumber with fetched data
       _fname = "Guilherme Claro"; // Example data
-      _job = ""; // Example data
       _phoneNumber = "964377079"; // Example data
       _isLoading = false; // Data loading is complete
     });
