@@ -18,9 +18,9 @@ docker buildx build --no-cache --platform linux/amd64 --network=host -t $NAMESPA
 echo "  announcements"
 docker buildx build --no-cache --platform linux/amd64 --network=host -t $NAMESPACE/announcements:$ANNOUNCEMENTS_VERSION ./announcements/api
 
-# echo "  booking"
-# docker buildx build --platform linux/amd64 --network=host -t $NAMESPACE/booking:v1 ./Booking/Dockerfile
-# docker buildx build --platform linux/amd64 --network=host -t $NAMESPACE/mysql:v1 ./Booking/Dockerfile.mysql
+echo "  booking"
+docker buildx build --platform linux/amd64 --network=host -t $NAMESPACE/booking:v1 ./booking/Dockerfile
+docker buildx build --platform linux/amd64 --network=host -t $NAMESPACE/mysql:v1 ./booking/Dockerfile.mysql
 
 echo "  nginx"
 docker buildx build --no-cache --platform linux/amd64 --network=host -t $NAMESPACE/nginx:$NGINX_VERSION -f ./deployment/Dockerfile.nginx ./deployment
@@ -29,8 +29,8 @@ echo "Deploying..."
 docker push $NAMESPACE/auth:$AUTH_VERSION
 docker push $NAMESPACE/auth-db:$AUTH_VERSION
 docker push $NAMESPACE/announcements:$ANNOUNCEMENTS_VERSION
-# docker push $NAMESPACE/booking:v1
-# docker push $NAMESPACE/mysql:v1
+docker push $NAMESPACE/booking:v1
+docker push $NAMESPACE/mysql:v1
 docker push $NAMESPACE/nginx:$NGINX_VERSION
 
 echo "Applying deployment in $NAMESPACE pod..."

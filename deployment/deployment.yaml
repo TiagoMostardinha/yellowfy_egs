@@ -137,6 +137,169 @@ spec:
           ports:
             - containerPort: 27017
 
+#Create app service for booking service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking
+  template:
+    metadata:
+      labels:
+        app: booking
+    spec:
+      containers:
+      - name: booking
+        image: registry.deti/egs-yellowfy/booking:v1
+        env:
+        - name: DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: db-uri-secret-booking
+              key: sqlalchemy_database_uri
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+# Create db deployment for booking service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: egs-yellowfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-password-booking
+              key: password
+        - name: MYSQL_USER
+          value: admin
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-password-booking
+              key: password
+        - name: MYSQL_DATABASE
+          value: booking
+        volumeMounts:
+        - name: init-script-booking
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+      volumes:
+        - name: init-script-booking
+          configMap:
+            name: mysql-init-script-booking
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: egs-yellowfy
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+    
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-uri-secret-booking
+  namespace: egs-yellowfy
+type: Opaque
+data:
+  sqlalchemy_database_uri: bXlzcWwrcHlteXNxbDovL2FkbWluOmFkbWluQGFkbWluOjMzMDYvYm9va2luZw==
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-root-password-booking
+  namespace: egs-yellowfy
+type: Opaque
+data:
+  password: YWRtaW4=   # Base64 encoded value of 'admin'
+
+# Create Service for booking
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking
+  namespace: egs-yellowfy
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: booking
+
+# Create Service for APP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: egs-yellowfy
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx
+
+# Create ConfigMap for booking
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script-booking
+  namespace: egs-yellowfy
+data:
+  init.sql: |
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'admin';
+    CREATE DATABASE IF NOT EXISTS booking;
+    CREATE USER 'admin'@'localhost' IDENTIFIED BY 'admin';
+    GRANT ALL PRIVILEGES ON booking.* TO 'admin'@'localhost';
+    FLUSH PRIVILEGES;
+
 # Create nginx deployment
 ---
 apiVersion: apps/v1

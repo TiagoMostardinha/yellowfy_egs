@@ -1,17 +1,17 @@
 # Use the official Python image as a base image
 FROM python:3.10-slim
 
+#Create a directory /booking
+RUN mkdir /booking
+
 # Set the working directory in the container
-WORKDIR /booking
+WORKDIR /booking/
 
 # Copy the current directory contents into the container at /app
-COPY . .
-
-# Copy the requirements.txt file into the container at /app
-COPY requirements.txt .
+COPY . /booking/
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install fastapi==0.68.0 uvicorn==0.15.0 sqlmodel==0.0.9 pymysql==1.0.2
 
 # Install MySQL client
 RUN apt-get update && apt-get install -y default-mysql-client

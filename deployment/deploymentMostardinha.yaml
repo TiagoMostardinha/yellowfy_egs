@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: announcements
-          image: registry.deti/egs-yellowfy/announcements:v6
+          image: registry.deti/egs-yellowfy/booking:v1
           resources:
             requests:
               memory: "32Mi"
