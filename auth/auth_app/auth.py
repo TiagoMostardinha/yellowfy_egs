@@ -19,7 +19,7 @@ google = oauth.register(
     access_token_url='https://accounts.google.com/o/oauth2/token',
     client_kwargs={'scope': 'openid profile email'},
     jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
-    redirect_uri='http://egs-yellowfy.com/auth/login/google/callback'
+    redirect_uri='http://grupo6-egs-deti.ua.pt/auth/login/google/callback'
 )
 
 @auth.route('/auth/login')
@@ -100,7 +100,7 @@ def google_login():
     nonce = secrets.token_urlsafe(16)
     session['oauth_state'] = state
     session['oauth_nonce'] = nonce
-    redirect_uri = 'http://egs-yellowfy.com/auth/login/google/callback'
+    redirect_uri = 'http://grupo6-egs-deti.ua.pt/auth/login/google/callback'
     return google.authorize_redirect(redirect_uri=redirect_uri, state=state, nonce=nonce)
 
 
