@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: registry.deti/egs-yellowfy/auth:v1
+        image: registry.deti/egs-yellowfy/auth:v4
         env:
         - name: DATABASE_URI
           valueFrom:
@@ -140,12 +140,12 @@ spec:
   selector:
     app: auth
 
-# Create Service for APP
+# Create Service for nginx
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx
+  name: nginx-service
   namespace: egs-yellowfy
 spec:
   ports:
@@ -169,23 +169,23 @@ data:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app-k3s
+  name: yellowfy-k3s
   namespace: egs-yellowfy
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/frontend-entry-points: http,https
     traefik.ingress.kubernetes.io/redirect-entry-point: https
-    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    traefik.ingress.kubernetes.io/redirect-permanentyy: "true"
 spec:
   rules:
-  - host: egs-yellowfy.deti
+  - host: egs-yellowfy.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: nginx
+            name: nginx-service
             port: 
               number: 80
 

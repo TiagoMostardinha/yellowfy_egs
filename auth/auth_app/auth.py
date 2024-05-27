@@ -19,7 +19,7 @@ google = oauth.register(
     access_token_url='https://accounts.google.com/o/oauth2/token',
     client_kwargs={'scope': 'openid profile email'},
     jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
-    redirect_uri='http://0.0.0.0:5000/login/google/callback'
+    redirect_uri='http://grupo6-egs-deti.ua.pt/auth/login/google/callback'
 )
 
 @auth.route('/auth/login')
@@ -91,7 +91,7 @@ def userinfo():
 @jwt_required(refresh=True)
 def refresh():
     current_user_id = get_jwt_identity()
-    access_token = create_access_token(identity=current_user_id, issuer='https://accounts.google.com')
+    access_token = create_access_token(identity=current_user_id)
     return {'access_token': access_token}, 200
 
 @auth.route('/auth/login/google')
@@ -100,7 +100,9 @@ def google_login():
     nonce = secrets.token_urlsafe(16)
     session['oauth_state'] = state
     session['oauth_nonce'] = nonce
-    return google.authorize_redirect(redirect_uri=url_for('auth.google_callback', _external=True),state=state,nonce=nonce)
+    redirect_uri = 'http://grupo6-egs-deti.ua.pt/auth/login/google/callback'
+    return google.authorize_redirect(redirect_uri=redirect_uri, state=state, nonce=nonce)
+
 
 
 @auth.route('/auth/login/google/callback')
@@ -114,9 +116,7 @@ def google_callback():
     nonce = session.pop('oauth_nonce', None)
     user_info = google.parse_id_token(token, nonce)
 
-    user_info = google.get("https://www.googleapis.com/oauth2/v2/userinfo").json()
-
-    print(user_info)  # Debugging line to check the user_info dictionary
+    user_info = google.get("https://www.googleapis.com/oauth2/v2/userinfo", verify=False).json()
 
     if 'email' not in user_info:
         abort(500, 'Email not found in user info')
@@ -126,7 +126,6 @@ def google_callback():
     google_token = token['access_token']  # Fetching Google token
 
     if not user:
-        # First time logging in with Google
         return render_template('additional_info.html', email=user_info['email'],name=user_info['name'], google_token=google_token)
     else:
         user.email = user_info['email']

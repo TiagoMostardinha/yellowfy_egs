@@ -1,6 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM python:3.10.12-slim
-
+     
 #Create a directory /app
 RUN mkdir /app
 
