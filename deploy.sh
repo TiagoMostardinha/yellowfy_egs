@@ -1,8 +1,8 @@
 #!/bin/bash
 NAMESPACE="registry.deti/egs-yellowfy"
 
-AUTH_VERSION="v1"
-ANNOUNCEMENTS_VERSION="v1"
+AUTH_VERSION="v8"
+ANNOUNCEMENTS_VERSION="v7"
 NGINX_VERSION="v1"
 
 echo "Deleting previous deployment..."
