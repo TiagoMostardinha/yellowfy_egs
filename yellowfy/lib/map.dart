@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+// Import your handlers file
+import 'package:yellowfy/common/Handlers.dart';
+import 'package:yellowfy/models/announcements.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -14,6 +17,8 @@ class _MapPageState extends State<MapPage> {
   LatLng? currentLocation;
   Set<Marker> markers = {};
   double _radius = 1000; // Initial radius in meters
+  String _selectedJobType = 'All Jobs';
+  final Handlers handlers = Handlers(); // Create an instance of Handlers
 
   @override
   void initState() {
@@ -21,7 +26,7 @@ class _MapPageState extends State<MapPage> {
     _getCurrentLocation();
   }
 
-  static const LatLng _center = const LatLng(40.6360, -8.6532);
+  static const LatLng _center = LatLng(40.6360, -8.6532);
 
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -40,6 +45,46 @@ class _MapPageState extends State<MapPage> {
       currentLocation = LatLng(position.latitude, position.longitude);
       mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
     });
+    _fetchAnnouncements(); // Fetch announcements when location is acquired
+  }
+
+  Future<void> _fetchAnnouncements() async {
+    if (currentLocation != null) {
+      try {
+        List<Announcement> announcements = await Handlers().handleGetAnnouncementsByGPS(
+          _radius,
+          currentLocation!.latitude,
+          currentLocation!.longitude,
+        );
+        _updateMarkers(announcements);
+      } catch (e) {
+        print('Error fetching announcements: $e');
+      }
+    }
+  }
+
+  void _updateMarkers(List<Announcement> announcements) {
+    setState(() {
+      markers.clear();
+      for (var announcement in announcements) {
+        if (_selectedJobType == 'All Jobs' ||
+            _selectedJobType == announcement.category) {
+          markers.add(
+            Marker(
+              markerId: MarkerId(announcement.id),
+              position: LatLng(
+                announcement.coordinates.latitude,
+                announcement.coordinates.longitude,
+              ),
+              infoWindow: InfoWindow(
+                title: announcement.category,
+                snippet: announcement.description,
+              ),
+            ),
+          );
+        }
+      }
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -49,7 +94,19 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  String _selectedJobType = 'All Jobs';
+  void _increaseRadius() {
+    setState(() {
+      _radius += 500; // Increase the radius by 500 meters
+    });
+    _fetchAnnouncements(); // Fetch announcements with the new radius
+  }
+
+  void _onJobTypeSelected(String value) {
+    setState(() {
+      _selectedJobType = value;
+    });
+    _fetchAnnouncements(); // Refetch announcements with the selected job type
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,13 +118,7 @@ class _MapPageState extends State<MapPage> {
         actions: [
           PopupMenuButton<String>(
             icon: Icon(Icons.filter_list),
-            onSelected: (String value) {
-              setState(() {
-                _selectedJobType = value;
-              });
-              // Perform filtering based on the selected job type
-              // Update the map markers accordingly
-            },
+            onSelected: _onJobTypeSelected,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
                 value: 'All Jobs',
@@ -129,6 +180,7 @@ class _MapPageState extends State<MapPage> {
                     setState(() {
                       _radius = value;
                     });
+                    _fetchAnnouncements(); // Refetch announcements with the new radius
                   },
                 ),
                 Text(

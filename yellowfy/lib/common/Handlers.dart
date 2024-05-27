@@ -127,7 +127,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
     final response =
-        await http.get(Uri.parse("http://$url:$port/appointments/"));
+        await http.get(Uri.parse("http://$url/booking/apointment"));
     if (response.statusCode == 200) {
       List<Appointment> appointments = [];
       var data = jsonDecode(response.body);

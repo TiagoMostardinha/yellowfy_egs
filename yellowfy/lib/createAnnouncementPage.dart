@@ -3,11 +3,15 @@ import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
 
 class CreateAnnouncementPage extends StatelessWidget {
-  const CreateAnnouncementPage({Key? key}) : super(key: key);
+  final String userId;
+  final String userName;
+
+  const CreateAnnouncementPage(
+      {Key? key, required this.userId, required this.userName})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController userIdController = TextEditingController();
     TextEditingController categoryController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
     TextEditingController latitudeController = TextEditingController();
@@ -15,14 +19,14 @@ class CreateAnnouncementPage extends StatelessWidget {
 
     Future<void> postAnnouncement(BuildContext context) async {
       Announcement announcement = Announcement(
-        userId: userIdController.text,
+        userId: userName,
         category: categoryController.text,
         description: descriptionController.text,
         coordinates: Coordinate(
           latitude: double.parse(latitudeController.text),
           longitude: double.parse(longitudeController.text),
         ),
-        id: '',
+        id: userId,
       );
 
       try {
@@ -47,10 +51,11 @@ class CreateAnnouncementPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              controller: userIdController,
-              decoration: const InputDecoration(labelText: 'User ID'),
+            Text(
+              'Creating announcement for: $userName',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 10),
             TextFormField(
               controller: categoryController,
               decoration: const InputDecoration(labelText: 'Category'),

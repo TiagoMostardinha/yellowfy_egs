@@ -30,22 +30,8 @@ class AnnouncementsPage extends StatelessWidget {
         // add a button to create a new announcement
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // Navigate to the announcement creation page
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateAnnouncementPage(),
-                ),
-              );
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.filter),
-            onPressed: () {
-              // i need to filtr the announcements by job
-            },
+            onPressed: () {},
           )
         ],
       ),
