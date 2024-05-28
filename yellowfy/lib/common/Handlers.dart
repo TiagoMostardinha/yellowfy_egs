@@ -42,11 +42,11 @@ class Handlers {
     }
   }
 
-  Future<Announcement> handleGetAnnouncementsById(String id) async {
+  Future<Announcement> handleGetAnnouncementsByUserId(String userId) async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
     final response =
-        await http.get(Uri.parse("http://$url/announcements/v1/$id"));
+        await http.get(Uri.parse("http://$url/announcements/v1/$userId"));
     if (response.statusCode == 200) {
       Announcement announcement;
       var data = jsonDecode(response.body);
@@ -114,8 +114,10 @@ class Handlers {
         'userID': announcement.userId,
         'category': announcement.category,
         'description': announcement.description,
-        'latitude': announcement.coordinates.latitude,
-        'longitude': announcement.coordinates.longitude,
+        'location': {
+          'lat': announcement.coordinates.latitude,
+          'long': announcement.coordinates.longitude,
+        }
       }),
     );
     if (response.statusCode != 201) {
@@ -126,37 +128,15 @@ class Handlers {
   /*
   * Appointements
   */
-  Future<List<Appointment>> handleGetAppointments() async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
-    final response =
-        await http.get(Uri.parse("http://$url/booking/appointments/"));
-    if (response.statusCode == 200) {
-      List<Appointment> appointments = [];
-      var data = jsonDecode(response.body);
-      print(data);
-      for (var i in data) {
-        appointments.add(Appointment(
-          i['announcement_id'] ?? '',
-          i['date_time'] ?? '',
-          i['client_id'] ?? '',
-          i['contractor_id'] ?? '',
-          i['duration'] ?? '',
-        ));
-      }
-      return appointments;
-    } else {
-      throw Exception('Failed to load appointments: ${response.statusCode}');
-    }
-  }
 
   // get appointments by contractor id
 
-  Future<Appointment> handleGetPostByCID(String id) async {
+  Future<Appointment> handleGetAvailableHours(
+      String contractor_id, String date_time) async {
     String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
+
     final response =
-        await http.get(Uri.parse("http://$url/booking/appointments/"));
+        await http.get(Uri.parse("http://$url/appointments/avaliable_hours/"));
     if (response.statusCode == 200) {
       Appointment appointment;
 
@@ -167,7 +147,6 @@ class Handlers {
         data['date_time'] ?? '',
         data['client_id'] ?? '',
         data['contractor_id'] ?? '',
-        data['duration'] ?? '',
       );
       return appointment;
     } else {
@@ -188,7 +167,6 @@ class Handlers {
         'date_time': appointment.date_time,
         'client_id': appointment.client_id,
         'contractor_id': appointment.contractor_id,
-        'duration': appointment.duration,
       }),
     );
     if (response.statusCode != 201) {

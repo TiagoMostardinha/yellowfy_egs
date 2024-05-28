@@ -30,13 +30,21 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (selectedDay.isBefore(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Cannot select today's date or a past date."),
+        ),
+      );
+      return;
+    }
     setState(() {
       _selectedDate = selectedDay;
     });
   }
 
   void _fetchAppointments() async {
-    List<Appointment> appointments = await Handlers().handleGetAppointments();
+    List<Appointment> appointments = await Handlers().handleGetAppointmentsCID();
     for (Appointment appointment in appointments) {
       if (appointment.announcement_id == widget.announcement_id &&
           appointment.contractor_id == widget.contractor_id) {
@@ -54,9 +62,20 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Future<void> _bookAppointment() async {
+    if (_selectedDate.isBefore(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Cannot book an appointment for today's date or a past date."),
+        ),
+      );
+      return;
+    }
+
     Appointment appointment = Appointment(
       widget.announcement_id,
-      DateTime.now().toIso8601String(),
+      _selectedDate
+          .toIso8601String(), // Use the selected date instead of current date
       'client_id',
       widget.contractor_id,
       _selectedHour.toString(),
@@ -118,11 +137,11 @@ class _BookingPageState extends State<BookingPage> {
               lastDay: DateTime.utc(2100, 12, 31),
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.4),
+                  color: Colors.yellowAccent.withOpacity(0.4),
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: const BoxDecoration(
-                  color: Colors.blueAccent,
+                  color: Colors.yellowAccent,
                   shape: BoxShape.circle,
                 ),
                 weekendTextStyle: const TextStyle(color: Colors.white),
@@ -145,6 +164,10 @@ class _BookingPageState extends State<BookingPage> {
               },
               onDaySelected: _onDaySelected,
               availableCalendarFormats: const {CalendarFormat.month: ''},
+              enabledDayPredicate: (day) {
+                return day
+                    .isAfter(DateTime.now().subtract(const Duration(days: 1)));
+              },
             ),
             const SizedBox(height: 20),
             const Text(

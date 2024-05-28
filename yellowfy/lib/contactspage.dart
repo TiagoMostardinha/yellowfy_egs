@@ -3,6 +3,7 @@ import 'package:yellowfy/announcements.dart';
 import 'package:yellowfy/login.dart';
 import 'package:yellowfy/map.dart';
 import 'package:yellowfy/booking.dart';
+import 'package:yellowfy/profile_page.dart';
 
 class ContactInfoPage extends StatelessWidget {
   final String contactInfo;
@@ -149,7 +150,7 @@ class ContactInfoPage extends StatelessWidget {
           if (index == 0) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
+              MaterialPageRoute(builder: (context) => ProfilePage()),
             );
           } else if (index == 1) {
             Navigator.push(

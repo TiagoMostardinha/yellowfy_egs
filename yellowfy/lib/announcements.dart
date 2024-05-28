@@ -60,7 +60,7 @@ class AnnouncementsPage extends StatelessWidget {
                   imagePath: 'assets/images.jpg',
                   contactInfo: announcements[index].description,
                   coordinates:
-                      '${announcements[index].coordinates.latitude} ${announcements[index].coordinates.longitude}',
+                      '${announcements[index].coordinates.latitude}, ${announcements[index].coordinates.longitude}',
                   description: announcements[index].description,
                   id: announcements[index].id,
                   context: context,
