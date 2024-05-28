@@ -1,6 +1,12 @@
 # yellowfy_egs
 
 ---
+# Yellowfy
+## Description
+- Yellowfy app is an application with a lack of services behind where it's main purpose is to provide users an oppurtunity to search house work jobs and others and provide to others.
+- **Architecture:** ![architecture](readme/yellowfy.png)
+
+
 ---
 # Announcements API
 ## Description
