@@ -27,12 +27,6 @@ class AnnouncementsPage extends StatelessWidget {
         title: const Text('Announcements'),
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter),
-            onPressed: () {},
-          )
-        ],
       ),
       backgroundColor: Colors.black, // Set the background color of the Scaffold
       body: FutureBuilder<List<Announcement>>(
@@ -55,7 +49,9 @@ class AnnouncementsPage extends StatelessWidget {
               itemCount: announcements!.length,
               itemBuilder: (context, index) {
                 return _buildAnnouncementCard(
-                  name: announcements[index].userId,
+                  name: announcements[index].name,
+                  // i need to convert userId to a int
+                  userID: int.parse(announcements[index].userId),
                   job: announcements[index].category,
                   imagePath: 'assets/images.jpg',
                   contactInfo: announcements[index].description,
@@ -111,6 +107,7 @@ class AnnouncementsPage extends StatelessWidget {
   Widget _buildAnnouncementCard({
     required String name,
     required String job,
+    required int userID,
     required String imagePath,
     required String contactInfo,
     required String coordinates,
@@ -125,6 +122,7 @@ class AnnouncementsPage extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ContactInfoPage(
                 contactInfo: contactInfo,
+                userID: userID,
                 name: name,
                 job: job,
                 announcement_id: id,

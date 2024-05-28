@@ -7,6 +7,7 @@ import 'package:yellowfy/profile_page.dart';
 
 class ContactInfoPage extends StatelessWidget {
   final String contactInfo;
+  final int  userID;
   final String name;
   final String job;
   final String announcement_id;
@@ -16,6 +17,7 @@ class ContactInfoPage extends StatelessWidget {
   const ContactInfoPage({
     Key? key,
     required this.contactInfo,
+    required this.userID,
     required this.name,
     required this.job,
     required this.announcement_id,
@@ -103,8 +105,7 @@ class ContactInfoPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BookingPage(
-                            announcement_id: announcement_id,
-                            contractor_id: name,
+                            contractor_id: userID,
                           ),
                         ),
                       );

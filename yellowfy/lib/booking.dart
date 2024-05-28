@@ -5,10 +5,8 @@ import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/appointment.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage(
-      {super.key, required this.announcement_id, required this.contractor_id});
-  final String announcement_id;
-  final String contractor_id;
+  const BookingPage({super.key, required this.contractor_id});
+  final int contractor_id;
 
   @override
   _BookingPageState createState() => _BookingPageState();
@@ -30,7 +28,8 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (selectedDay.isBefore(DateTime.now())) {
+    if (selectedDay
+        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Cannot select today's date or a past date."),
@@ -44,25 +43,28 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _fetchAppointments() async {
-    List<Appointment> appointments = await Handlers().handleGetAppointmentsCID();
-    for (Appointment appointment in appointments) {
-      if (appointment.announcement_id == widget.announcement_id &&
-          appointment.contractor_id == widget.contractor_id) {
-        DateTime appointmentDate = DateTime.parse(appointment.date_time);
-        if (!bookedSlots.containsKey(appointmentDate)) {
-          bookedSlots[appointmentDate] = [];
+    try {
+      List<Appointment> appointments = await Handlers().handleGetAvailableHours(
+          widget.contractor_id, _selectedDate.toIso8601String());
+      setState(() {
+        bookedSlots.clear();
+        for (Appointment appointment in appointments) {
+          DateTime appointmentDate = DateTime.parse(appointment.date_time);
+          if (!bookedSlots.containsKey(appointmentDate)) {
+            bookedSlots[appointmentDate] = [];
+          }
+          bookedSlots[appointmentDate]!.add(
+              int.parse(appointment.date_time.split('T')[1].split(':')[0]));
         }
-        bookedSlots[appointmentDate]!.add(int.parse(appointment.duration));
-      }
-      print(appointment.announcement_id);
-      if (kDebugMode) {
-        print("appointment.contractor_id");
-      }
+      });
+    } catch (e) {
+      print('Error fetching appointments: $e');
     }
   }
 
   Future<void> _bookAppointment() async {
-    if (_selectedDate.isBefore(DateTime.now())) {
+    if (_selectedDate
+        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -73,12 +75,10 @@ class _BookingPageState extends State<BookingPage> {
     }
 
     Appointment appointment = Appointment(
-      widget.announcement_id,
       _selectedDate
           .toIso8601String(), // Use the selected date instead of current date
-      'client_id',
+      1, // need to get this from the user that is logged in
       widget.contractor_id,
-      _selectedHour.toString(),
     );
     try {
       await Handlers().handlePostAppointment(appointment);
@@ -209,7 +209,9 @@ class _BookingPageState extends State<BookingPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              '${_selectedHour.toString().padLeft(2, '0')}:00',
+              // it need to be the hour and the minute
+              '${_selectedDate.hour.toString().padLeft(2, '0')}:00',
+
               style: const TextStyle(color: Colors.white),
             ),
             const Spacer(),

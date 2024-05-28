@@ -22,6 +22,7 @@ class Handlers {
         var userId = i['userID'] ?? '';
         var category = i['category'] ?? '';
         var description = i['description'] ?? '';
+        var name = i['name'] ?? '';
         var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
         var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
 
@@ -30,6 +31,7 @@ class Handlers {
           userId: userId,
           category: category,
           description: description,
+          name: name,
           coordinates: Coordinate(
             latitude: latitude,
             longitude: longitude,
@@ -56,6 +58,7 @@ class Handlers {
         userId: data['userID'] ?? '',
         category: data['category'] ?? '',
         description: data['description'] ?? '',
+        name: data['name'] ?? '',
         coordinates: Coordinate(
           latitude: double.tryParse(data['latitude'] ?? '') ?? 0.0,
           longitude: double.tryParse(data['longitude'] ?? '') ?? 0.0,
@@ -81,6 +84,7 @@ class Handlers {
         var id = i['Id'] ?? '';
         var userId = i['userID'] ?? '';
         var category = i['category'] ?? '';
+        var name = i['name'] ?? '';
         var description = i['description'] ?? '';
         var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
         var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
@@ -89,6 +93,7 @@ class Handlers {
           id: id,
           userId: userId,
           category: category,
+          name: name,
           description: description,
           coordinates: Coordinate(
             latitude: latitude,
@@ -107,11 +112,9 @@ class Handlers {
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
     final response = await http.post(
       Uri.parse("http://$url/announcements/v1/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
       body: jsonEncode(<String, dynamic>{
         'userID': announcement.userId,
+        'name': announcement.name,
         'category': announcement.category,
         'description': announcement.description,
         'location': {
@@ -131,26 +134,41 @@ class Handlers {
 
   // get appointments by contractor id
 
-  Future<Appointment> handleGetAvailableHours(
-      String contractor_id, String date_time) async {
+  Future<List<Appointment>> handleGetAvailableHours(
+      int contractor_id, String date_time) async {
     String url = dotenv.get("URL", fallback: "");
-
-    final response =
-        await http.get(Uri.parse("http://$url/appointments/avaliable_hours/"));
+    final response = await http.get(Uri.parse(
+        "http://$url/booking/appointments/available_hours/$contractor_id/$date_time"));
     if (response.statusCode == 200) {
-      Appointment appointment;
-
       var data = jsonDecode(response.body);
 
-      appointment = Appointment(
-        data['announcement_id'] ?? '',
-        data['date_time'] ?? '',
-        data['client_id'] ?? '',
-        data['contractor_id'] ?? '',
-      );
-      return appointment;
+      // Check if data is empty
+      if (data == null || data.isEmpty) {
+        return []; // Return an empty list if no appointments are available
+      }
+
+      // Assuming the response is a list of appointments
+      List<Appointment> appointments = (data as List)
+          .map((item) => Appointment(
+                item['date_time'] ?? '',
+                item['client_id'] ?? '',
+                item['contractor_id'] ?? '',
+              ))
+          .toList();
+
+      return appointments;
     } else {
-      throw Exception('Failed to load appointments: ${response.statusCode}');
+      // Log error details for debugging
+      print('Failed to load available hours: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // Handle different status codes
+      if (response.statusCode == 500) {
+        throw Exception('Server error. Please try again later.');
+      } else {
+        throw Exception(
+            'Failed to load available hours: ${response.statusCode}');
+      }
     }
   }
 
@@ -158,12 +176,8 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
     final response = await http.post(
-      Uri.parse("http://$url:$port/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      Uri.parse("http://$url/booking/appointments/"),
       body: jsonEncode(<String, dynamic>{
-        'announcement_id': appointment.announcement_id,
         'date_time': appointment.date_time,
         'client_id': appointment.client_id,
         'contractor_id': appointment.contractor_id,
@@ -171,54 +185,6 @@ class Handlers {
     );
     if (response.statusCode != 201) {
       throw Exception('Failed to post appointment: ${response.statusCode}');
-    }
-  }
-
-  /*
-  * Authentication
-  */
-
-  Future<Authentication> handleGetAuthentication() async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
-
-    final response = await http.get(Uri.parse("http://$url/auth/login/"));
-
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-
-      return Authentication(
-        data['id'] ?? '',
-        data['name'] ?? '',
-        data['email'] ?? '',
-        data['password'] ?? '',
-        data['looking_for_work'] ?? '',
-        data['mobile_number'] ?? '',
-      );
-    } else {
-      throw Exception(
-          'Failed to load authentication for user : ${response.statusCode}');
-    }
-  }
-
-  Future<void> handlePostAuthentication(Authentication authentication) async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
-    final response = await http.post(
-      Uri.parse("http://$url:$port/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'name': authentication.name,
-        'email': authentication.email,
-        'password': authentication.password,
-        'looking_for_work': authentication.looking_for_work,
-        'mobile_number': authentication.mobile_number,
-      }),
-    );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to post authentication: ${response.statusCode}');
     }
   }
 }

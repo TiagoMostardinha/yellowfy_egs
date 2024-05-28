@@ -17,7 +17,6 @@ class _MapPageState extends State<MapPage> {
   LatLng? currentLocation;
   Set<Marker> markers = {};
   double _radius = 1000; // Initial radius in meters
-  String _selectedJobType = 'All Jobs';
   final Handlers handlers = Handlers(); // Create an instance of Handlers
 
   @override
@@ -51,7 +50,8 @@ class _MapPageState extends State<MapPage> {
   Future<void> _fetchAnnouncements() async {
     if (currentLocation != null) {
       try {
-        List<Announcement> announcements = await Handlers().handleGetAnnouncementsByGPS(
+        List<Announcement> announcements =
+            await Handlers().handleGetAnnouncementsByGPS(
           _radius,
           currentLocation!.latitude,
           currentLocation!.longitude,
@@ -67,22 +67,19 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       markers.clear();
       for (var announcement in announcements) {
-        if (_selectedJobType == 'All Jobs' ||
-            _selectedJobType == announcement.category) {
-          markers.add(
-            Marker(
-              markerId: MarkerId(announcement.id),
-              position: LatLng(
-                announcement.coordinates.latitude,
-                announcement.coordinates.longitude,
-              ),
-              infoWindow: InfoWindow(
-                title: announcement.category,
-                snippet: announcement.description,
-              ),
+        markers.add(
+          Marker(
+            markerId: MarkerId(announcement.id),
+            position: LatLng(
+              announcement.coordinates.latitude,
+              announcement.coordinates.longitude,
             ),
-          );
-        }
+            infoWindow: InfoWindow(
+              title: announcement.category,
+              snippet: announcement.description,
+            ),
+          ),
+        );
       }
     });
   }
@@ -101,13 +98,6 @@ class _MapPageState extends State<MapPage> {
     _fetchAnnouncements(); // Fetch announcements with the new radius
   }
 
-  void _onJobTypeSelected(String value) {
-    setState(() {
-      _selectedJobType = value;
-    });
-    _fetchAnnouncements(); // Refetch announcements with the selected job type
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,30 +105,6 @@ class _MapPageState extends State<MapPage> {
         title: const Text('YellowFinder'),
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
-        actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.filter_list),
-            onSelected: _onJobTypeSelected,
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'All Jobs',
-                child: Text('All Jobs'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'Plumber',
-                child: Text('Plumber'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'Contractor',
-                child: Text('Contractor'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'Painter',
-                child: Text('Painter'),
-              ),
-            ],
-          ),
-        ],
       ),
       body: Stack(
         children: [

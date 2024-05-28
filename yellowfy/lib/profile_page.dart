@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -91,7 +93,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        _buildProfileInfo('ID', _id),
                         _buildProfileInfo('Name', _name),
                         _buildProfileInfo('Email', _email),
                         _buildProfileInfo('Phone', _phone),
@@ -108,6 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         builder: (context) => CreateAnnouncementPage(
                           userId: _id,
                           userName: _name,
+                          phone : _phone
                         ),
                       ),
                     );
