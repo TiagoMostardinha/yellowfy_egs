@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final _url = 'http://grupo6-egs-deti.ua.pt/auth/login';
+  final _url = 'http://grupo6-egs-deti.ua.pt/auth/signup';
   final _storage = FlutterSecureStorage();
 
   late WebViewController _controller;
@@ -22,7 +22,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(   
+      appBar: AppBar(
         title: const Text(
           'Join the Yellow Community!',
           style: TextStyle(

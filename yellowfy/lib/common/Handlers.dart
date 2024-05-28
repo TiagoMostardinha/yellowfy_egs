@@ -66,10 +66,13 @@ class Handlers {
       throw Exception('Failed to load announcements: ${response.statusCode}');
     }
   }
-    Future<List<Announcement>> handleGetAnnouncementsByGPS(double radius, double lat, double long) async {
+
+  Future<List<Announcement>> handleGetAnnouncementsByGPS(
+      double radius, double lat, double long) async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url/announcements/v1/?radius=$radius&lat=$lat&long=$long"));
+    final response = await http.get(Uri.parse(
+        "http://$url/announcements/v1/?radius=$radius&lat=$lat&long=$long"));
     if (response.statusCode == 200) {
       List<Announcement> announcements = [];
       var data = jsonDecode(response.body);
@@ -127,7 +130,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
     final response =
-        await http.get(Uri.parse("http://$url/booking/apointment"));
+        await http.get(Uri.parse("http://$url/booking/appointments/"));
     if (response.statusCode == 200) {
       List<Appointment> appointments = [];
       var data = jsonDecode(response.body);
@@ -153,7 +156,7 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
     final response =
-        await http.get(Uri.parse("http://$url:$port/appointments/$id"));
+        await http.get(Uri.parse("http://$url/booking/appointments/"));
     if (response.statusCode == 200) {
       Appointment appointment;
 

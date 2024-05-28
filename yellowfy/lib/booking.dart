@@ -18,9 +18,8 @@ class _BookingPageState extends State<BookingPage> {
   late DateTime _selectedDate;
   int _selectedHour = 0;
 
-  // Dummy list of booked slots for demonstration
   Map<DateTime, List<int>> bookedSlots = {
-    DateTime.now(): [10, 12, 15], // Example: Already booked hours for today
+    DateTime.now(): [10, 12, 15],
   };
 
   @override
@@ -49,7 +48,7 @@ class _BookingPageState extends State<BookingPage> {
       }
       print(appointment.announcement_id);
       if (kDebugMode) {
-        print("cona" + appointment.contractor_id);
+        print("appointment.contractor_id");
       }
     }
   }
@@ -58,7 +57,7 @@ class _BookingPageState extends State<BookingPage> {
     Appointment appointment = Appointment(
       widget.announcement_id,
       DateTime.now().toIso8601String(),
-      'client_id', //TODO: Dummy client ID
+      'client_id',
       widget.contractor_id,
       _selectedHour.toString(),
     );
@@ -75,7 +74,7 @@ class _BookingPageState extends State<BookingPage> {
       BuildContext context, String message) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Booking Confirmation'),
@@ -107,6 +106,7 @@ class _BookingPageState extends State<BookingPage> {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -125,12 +125,26 @@ class _BookingPageState extends State<BookingPage> {
                   color: Colors.blueAccent,
                   shape: BoxShape.circle,
                 ),
+                weekendTextStyle: const TextStyle(color: Colors.white),
+                defaultTextStyle: const TextStyle(color: Colors.white),
+              ),
+              daysOfWeekStyle: const DaysOfWeekStyle(
+                weekdayStyle: TextStyle(color: Colors.white),
+                weekendStyle: TextStyle(color: Colors.white),
+              ),
+              headerStyle: HeaderStyle(
+                titleTextStyle: const TextStyle(color: Colors.white),
+                formatButtonTextStyle: const TextStyle(color: Colors.white),
+                formatButtonDecoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDate, day);
               },
               onDaySelected: _onDaySelected,
-              availableCalendarFormats: {CalendarFormat.month: ''},
+              availableCalendarFormats: const {CalendarFormat.month: ''},
             ),
             const SizedBox(height: 20),
             const Text(
@@ -138,13 +152,28 @@ class _BookingPageState extends State<BookingPage> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _showAvailableHours(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellowAccent[700],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               child: Text(
-                  'View Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+                'View Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -152,19 +181,34 @@ class _BookingPageState extends State<BookingPage> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
-            Text('${_selectedHour.toString().padLeft(2, '0')}:00'),
+            Text(
+              '${_selectedHour.toString().padLeft(2, '0')}:00',
+              style: const TextStyle(color: Colors.white),
+            ),
             const Spacer(),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle booking logic here
-                  _showConfirmationDialog(context,
-                      'Appointment booked successfully!'); // Show confirmation dialog
-                },
-                child: const Text('Book Session'),
+                onPressed: _bookAppointment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellowAccent[700],
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text(
+                  'Book Session',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ],
@@ -174,9 +218,8 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _showAvailableHours(BuildContext context) {
-    List<int> availableHours = List.generate(24, (index) => index + 1);
+    List<int> availableHours = List.generate(24, (index) => index);
 
-    // If booked slots exist for the selected date, remove them from available hours
     if (bookedSlots.containsKey(_selectedDate)) {
       availableHours = availableHours
           .where((hour) => !bookedSlots[_selectedDate]!.contains(hour))
@@ -188,7 +231,9 @@ class _BookingPageState extends State<BookingPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-              'Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+            'Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+            style: const TextStyle(color: Colors.black),
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: availableHours.map((hour) {
