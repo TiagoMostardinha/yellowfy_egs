@@ -21,7 +21,7 @@ spec:
             privileged: true
       containers:
         - name: auth
-          image: registry.deti/egs-yellowfy/auth:v8
+          image: registry.deti/egs-yellowfy/auth:v20
           env:
             - name: DATABASE_URI
               valueFrom:
@@ -100,7 +100,7 @@ spec:
     spec:
       containers:
         - name: announcements
-          image: registry.deti/egs-yellowfy/announcements:v11
+          image: registry.deti/egs-yellowfy/announcements:v20
           resources:
             requests:
               memory: "32Mi"

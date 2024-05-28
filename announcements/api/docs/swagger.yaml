@@ -24,6 +24,8 @@ definitions:
         type: string
       location:
         $ref: '#/definitions/models.Coordinates'
+      name:
+        type: string
       userID:
         type: string
     type: object
@@ -62,6 +64,10 @@ paths:
         in: query
         name: long
         type: number
+      - description: name of the contractor
+        in: query
+        name: name
+        type: string
       produces:
       - applcation/json
       responses:

@@ -30,6 +30,7 @@ func handleReadiness(c *gin.Context) {
 // @Param			radius	query	float64	false	"radius in meters"
 // @Param			lat		query	float64	false	"latitude"
 // @Param			long	query	float64	false	"longitude"
+// @Param			name	query	string	false	"name of the contractor"
 // @Produce			applcation/json
 // @Tags			Announcements
 // @Success			200 {array} Announcement

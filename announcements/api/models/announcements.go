@@ -13,4 +13,5 @@ type Announcement struct {
 	Category    string             `json:"category" bson:"category"`
 	Description string             `json:"description" bson:"description"`
 	Location    Coordinates        `json:"location" bson:"location"`
+	Name        string             `json:"name" bson:"name"`
 }

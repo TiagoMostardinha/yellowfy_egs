@@ -43,6 +43,12 @@
                         "description": "longitude",
                         "name": "long",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the contractor",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -282,6 +288,9 @@
                 },
                 "location": {
                     "$ref": "#/definitions/models.Coordinates"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "userID": {
                     "type": "string"

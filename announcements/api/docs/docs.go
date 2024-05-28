@@ -49,6 +49,12 @@ const docTemplate = `{
                         "description": "longitude",
                         "name": "long",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the contractor",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -288,6 +294,9 @@ const docTemplate = `{
                 },
                 "location": {
                     "$ref": "#/definitions/models.Coordinates"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "userID": {
                     "type": "string"
