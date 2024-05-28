@@ -24,91 +24,110 @@ class ContactInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(name);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Yellow Worker'),
-        backgroundColor: Colors.yellowAccent[700],
+        backgroundColor:
+            Colors.yellowAccent[700], // Match the color with AnnouncementsPage
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 20),
-          const CircleAvatar(
-            radius: 80,
-            backgroundImage:
-                AssetImage('assets/images.jpg'), // Placeholder photo
-          ),
-          const SizedBox(height: 16),
-          Text(
-            name,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            job,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                coordinates,
-                style: TextStyle(fontSize: 18),
-              ),
-            ],
-          ),
-          const SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                contactInfo,
-                style: TextStyle(fontSize: 10),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 200, // Adjust width according to your needs
-            height: 50,
-            child: TextButton(
-              onPressed: () {
-                print(announcement_id);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BookingPage(
+      backgroundColor: Colors.black, // Set background color to blackS
+      body: Container(
+        color: Colors.black, // Set background color to black
+        child: SingleChildScrollView(
+          child: Container(
+            // Wrap SingleChildScrollView with Container
+            color: Colors.black, // Set background color to black
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                CircleAvatar(
+                  radius: 80,
+                  backgroundImage: AssetImage('assets/images.jpg'),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color:
+                        Colors.white, // Match text color with AnnouncementsPage
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  job,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color:
+                        Colors.white, // Match text color with AnnouncementsPage
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      coordinates,
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors
+                              .white), // Match text color with AnnouncementsPage
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      contactInfo,
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: Colors
+                              .white), // Match text color with AnnouncementsPage
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingPage(
                             announcement_id: announcement_id,
                             contractor_id: name,
-                          )),
-                );
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.yellowAccent[700],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.yellowAccent[
+                          700], // Match button color with AnnouncementsPage
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Book Now',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Book Now',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                ),
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.yellowAccent[700],
@@ -127,7 +146,6 @@ class ContactInfoPage extends StatelessWidget {
           ),
         ],
         onTap: (index) {
-          // Handle bottom navigation bar taps here
           if (index == 0) {
             Navigator.push(
               context,

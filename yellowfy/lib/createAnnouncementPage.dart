@@ -18,6 +18,7 @@ class CreateAnnouncementPage extends StatelessWidget {
     TextEditingController longitudeController = TextEditingController();
 
     Future<void> postAnnouncement(BuildContext context) async {
+      debugPrint('CONTEXTTTTTTTTTTTTTTTTT: $context');
       Announcement announcement = Announcement(
         userId: userName,
         category: categoryController.text,
@@ -26,7 +27,7 @@ class CreateAnnouncementPage extends StatelessWidget {
           latitude: double.parse(latitudeController.text),
           longitude: double.parse(longitudeController.text),
         ),
-        id: userId,
+        id: '',
       );
 
       try {
@@ -46,44 +47,100 @@ class CreateAnnouncementPage extends StatelessWidget {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
-      body: Padding(
+      backgroundColor: Colors.black, // Set the background color of the Scaffold
+      body: Container(
+        color: Colors.black, // Ensure the Container has a black background
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Creating announcement for: $userName',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: categoryController,
-              decoration: const InputDecoration(labelText: 'Category'),
-            ),
-            TextFormField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-            TextFormField(
-              controller: latitudeController,
-              decoration: const InputDecoration(labelText: 'Latitude'),
-              keyboardType: TextInputType.number,
-            ),
-            TextFormField(
-              controller: longitudeController,
-              decoration: const InputDecoration(labelText: 'Longitude'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                postAnnouncement(context);
-              },
-              child: const Text('Create Announcement'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Creating announcement for: $userName',
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              _buildTextFormField(
+                controller: categoryController,
+                label: 'Category',
+                icon: Icons.build,
+              ),
+              const SizedBox(height: 20),
+              _buildTextFormField(
+                controller: descriptionController,
+                label: 'Description',
+                icon: Icons.description,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 20),
+              _buildTextFormField(
+                controller: latitudeController,
+                label: 'Latitude',
+                icon: Icons.map,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+              _buildTextFormField(
+                controller: longitudeController,
+                label: 'Longitude',
+                icon: Icons.map,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 30),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    postAnnouncement(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellowAccent[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30.0, vertical: 15.0),
+                  ),
+                  child: const Text(
+                    'Create Announcement',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white),
+        prefixIcon: Icon(icon, color: Colors.yellowAccent[700]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        filled: true,
+        fillColor: Colors.grey[900], // Dark grey for the input fields
+      ),
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: const TextStyle(color: Colors.white),
     );
   }
 }

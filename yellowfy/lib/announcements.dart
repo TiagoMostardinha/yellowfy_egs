@@ -27,7 +27,6 @@ class AnnouncementsPage extends StatelessWidget {
         title: const Text('Announcements'),
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
-        // add a button to create a new announcement
         actions: [
           IconButton(
             icon: const Icon(Icons.filter),
@@ -35,6 +34,7 @@ class AnnouncementsPage extends StatelessWidget {
           )
         ],
       ),
+      backgroundColor: Colors.black, // Set the background color of the Scaffold
       body: FutureBuilder<List<Announcement>>(
         future: Handlers().handleGetAnnouncements(),
         builder: (context, snapshot) {
@@ -46,7 +46,9 @@ class AnnouncementsPage extends StatelessWidget {
             List<Announcement>? announcements = snapshot.data;
 
             if (announcements == null || announcements.isEmpty) {
-              return const Center(child: Text('No announcements found'));
+              return const Center(
+                  child: Text('No announcements found',
+                      style: TextStyle(color: Colors.yellowAccent)));
             }
             return ListView.builder(
               scrollDirection: Axis.vertical,
@@ -57,10 +59,8 @@ class AnnouncementsPage extends StatelessWidget {
                   job: announcements[index].category,
                   imagePath: 'assets/images.jpg',
                   contactInfo: announcements[index].description,
-                  coordinates: "" +
-                      announcements[index].coordinates.latitude.toString() +
-                      " " +
-                      announcements[index].coordinates.longitude.toString(),
+                  coordinates:
+                      '${announcements[index].coordinates.latitude} ${announcements[index].coordinates.longitude}',
                   description: announcements[index].description,
                   id: announcements[index].id,
                   context: context,
@@ -87,7 +87,6 @@ class AnnouncementsPage extends StatelessWidget {
           ),
         ],
         onTap: (index) {
-          // Handle bottom navigation bar taps here
           if (index == 0) {
             Navigator.push(
               context,
@@ -141,7 +140,7 @@ class AnnouncementsPage extends StatelessWidget {
           height: 225, // Adjust card height as needed
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.grey[200],
+            color: Colors.grey[900], // Updated to match dark theme
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,13 +169,14 @@ class AnnouncementsPage extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        color: Colors.white, // Updated text color
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       job,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.grey[400], // Updated text color
                       ),
                     ),
                   ],
@@ -189,14 +189,14 @@ class AnnouncementsPage extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.location_on,
-                      color: Colors.grey[600],
+                      color: Colors.grey[400], // Updated icon color
                       size: 16,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       coordinates,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.grey[400], // Updated text color
                       ),
                     ),
                   ],

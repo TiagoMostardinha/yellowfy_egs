@@ -62,37 +62,44 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Yellow Profile'),
-        backgroundColor: Colors.yellowAccent[700], // Adjust as per your theme
+        backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
+      backgroundColor: Colors.black, // Set the background color of the Scaffold
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.white70, Colors.white],
-            stops: [0.5, 0.5], // This defines where the split occurs
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+        color: Colors.black, // Ensure the Container has a black background
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // Profile Picture
                 CircleAvatar(
                   radius: 50.0,
                   backgroundImage: AssetImage('assets/images.jpg'),
+                  backgroundColor: Colors.transparent,
                 ),
                 const SizedBox(height: 20),
-                // User Information
-                _buildProfileInfo('ID', _id),
-                _buildProfileInfo('Name', _name),
-                _buildProfileInfo('Email', _email),
-                _buildProfileInfo('Phone', _phone),
+                Card(
+                  color: Colors.grey[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _buildProfileInfo('ID', _id),
+                        _buildProfileInfo('Name', _name),
+                        _buildProfileInfo('Email', _email),
+                        _buildProfileInfo('Phone', _phone),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
-                // Create Announcement Button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -105,7 +112,23 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     );
                   },
-                  child: const Text('Create Announcement'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellowAccent[700],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    'Create Announcement',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ],
             ),
@@ -119,21 +142,25 @@ class _ProfilePageState extends State<ProfilePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             '$label: ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
-              color: Colors.black87, // Adjust text color for visibility
+              color: Colors.white,
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black, // Adjust text color for visibility
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              softWrap: false,
             ),
           ),
         ],
