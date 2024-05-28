@@ -160,7 +160,7 @@ spec:
     spec:
       containers:
       - name: booking
-        image: registry.deti/egs-yellowfy/booking:v1
+        image: registry.deti/egs-yellowfy/booking:v3
         env:
         - name: DATABASE_URI
           valueFrom:

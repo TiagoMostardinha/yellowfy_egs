@@ -9,4 +9,4 @@ ENV MYSQL_DATABASE=booking
 ENV MYSQL_USER=admin
 ENV MYSQL_PASSWORD=admin
 
-COPY ./booking/init.sql /docker-entrypoint-initdb.d/init.sql
+COPY ./init.sql /docker-entrypoint-initdb.d/init.sql

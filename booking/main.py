@@ -36,7 +36,7 @@ engine = create_engine(mysql_url, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 SQLModel.metadata.create_all(engine)
 
-@app.post("/appointments/")
+@app.post("/booking/appointments/")
 async def create_appointment(appointment: appointments):
      with Session(engine) as session:
         session.add(appointment)
@@ -44,20 +44,20 @@ async def create_appointment(appointment: appointments):
         await session.refresh(appointment)
         return appointment
 
-@app.get("/appointments/{appointment_id}")
+@app.get("/booking/appointments/{appointment_id}")
 async def read_appointment(appointment_id: int):
      with Session(engine) as session:
         statement = select(appointments).where(appointments.id == appointment_id)
         appointment = await session.exec(statement).first()
         return appointment
 
-@app.get("/appointments/")
+@app.get("/booking/appointments/")
 async def read_appointments():
      with Session(engine) as session:
         appointments_list = session.exec(select(appointments)).all()
         return appointments_list
 
-@app.put("/appointments/{appointment_id}")
+@app.put("/booking/appointments/{appointment_id}")
 async def update_appointment(appointment_id: int, appointment: appointments):
      with Session(engine) as session:
         statement = select(appointments).where(appointments.id == appointment_id)
@@ -69,7 +69,7 @@ async def update_appointment(appointment_id: int, appointment: appointments):
         await session.commit()
         return appointment_db
 
-@app.delete("/appointments/{appointment_id}")
+@app.delete("/booking/appointments/{appointment_id}")
 async def delete_appointment(appointment_id: int):
      with Session(engine) as session:
         statement = select(appointments).where(appointments.id == appointment_id)
@@ -78,7 +78,7 @@ async def delete_appointment(appointment_id: int):
         await session.commit()
         return appointment
 
-@app.get("/appointments/available_hours/{contractor_id}/{date}")
+@app.get("/booking/appointments/available_hours/{contractor_id}/{date}")
 async def available_hours(contractor_id: int, date: datetime):
      with Session(engine) as session:
         statement = select(appointments).where(appointments.contractor_id == contractor_id, appointments.date == date)
