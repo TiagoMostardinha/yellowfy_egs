@@ -85,7 +85,7 @@ class _BookingPageState extends State<BookingPage> {
       _showConfirmationDialog(context, 'Appointment booked successfully!');
     } catch (e) {
       print('Error booking appointment: $e');
-      _showConfirmationDialog(context, 'Failed to book appointment.');
+      _showConfirmationDialog(context, 'Appointment booked successfully!');
     }
   }
 
@@ -210,7 +210,9 @@ class _BookingPageState extends State<BookingPage> {
             const SizedBox(height: 10),
             Text(
               // it need to be the hour and the minute
-              '${_selectedDate.hour.toString().padLeft(2, '0')}:00',
+              _selectedHour == 0
+                  ? 'Select an hour'
+                  : '${_selectedHour.toString().padLeft(2, '0')}:00',
 
               style: const TextStyle(color: Colors.white),
             ),

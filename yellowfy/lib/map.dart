@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-// Import your handlers file
 import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
 
@@ -43,19 +42,20 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       currentLocation = LatLng(position.latitude, position.longitude);
       mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+      _fetchAnnouncements(); // Fetch announcements when location is acquired
     });
-    _fetchAnnouncements(); // Fetch announcements when location is acquired
   }
 
   Future<void> _fetchAnnouncements() async {
     if (currentLocation != null) {
       try {
         List<Announcement> announcements =
-            await Handlers().handleGetAnnouncementsByGPS(
+            await handlers.handleGetAnnouncementsByGPS(
           _radius,
           currentLocation!.latitude,
           currentLocation!.longitude,
         );
+        print('Announcements fetched: ${announcements.length}');
         _updateMarkers(announcements);
       } catch (e) {
         print('Error fetching announcements: $e');
@@ -69,11 +69,14 @@ class _MapPageState extends State<MapPage> {
       for (var announcement in announcements) {
         markers.add(
           Marker(
-            markerId: MarkerId(announcement.id),
+            markerId:
+                MarkerId(announcement.id.toString()), // Ensure unique markerId
             position: LatLng(
               announcement.coordinates.latitude,
               announcement.coordinates.longitude,
             ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueYellow),
             infoWindow: InfoWindow(
               title: announcement.category,
               snippet: announcement.description,
@@ -81,6 +84,7 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       }
+      print('Markers updated: ${markers.length}');
     });
   }
 
