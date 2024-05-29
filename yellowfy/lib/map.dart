@@ -15,7 +15,7 @@ class _MapPageState extends State<MapPage> {
   GoogleMapController? mapController;
   LatLng? currentLocation;
   Set<Marker> markers = {};
-  double _radius = 1000; // Initial radius in meters
+  double _radius = 100; // Initial radius in meters
   final Handlers handlers = Handlers(); // Create an instance of Handlers
 
   @override
@@ -133,35 +133,6 @@ class _MapPageState extends State<MapPage> {
                     ),
                   }
                 : {},
-          ),
-          Positioned(
-            bottom: 50,
-            left: 10,
-            right: 10,
-            child: Column(
-              children: [
-                Slider(
-                  value: _radius,
-                  min: 100,
-                  max: 5000,
-                  divisions: 49,
-                  label: '${_radius.round()} meters',
-                  onChanged: (double value) {
-                    setState(() {
-                      _radius = value;
-                    });
-                    _fetchAnnouncements(); // Refetch announcements with the new radius
-                  },
-                ),
-                Text(
-                  'Search Radius: ${_radius.round()} meters',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
