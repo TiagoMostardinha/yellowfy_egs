@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:yellowfy/announcements.dart';
-import 'package:yellowfy/login.dart';
+import 'login.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -9,7 +8,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.yellow,
         ),
-        home: LoginPage(),
+        home: LoginPage(), // Set LoginPage as the home screen
         routes: {
           '/login': (context) => LoginPage(),
         });

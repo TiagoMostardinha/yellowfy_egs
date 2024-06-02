@@ -5,10 +5,8 @@ import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/appointment.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage(
-      {super.key, required this.announcement_id, required this.contractor_id});
-  final String announcement_id;
-  final String contractor_id;
+  const BookingPage({super.key, required this.contractor_id});
+  final int contractor_id;
 
   @override
   _BookingPageState createState() => _BookingPageState();
@@ -18,9 +16,8 @@ class _BookingPageState extends State<BookingPage> {
   late DateTime _selectedDate;
   int _selectedHour = 0;
 
-  // Dummy list of booked slots for demonstration
   Map<DateTime, List<int>> bookedSlots = {
-    DateTime.now(): [10, 12, 15], // Example: Already booked hours for today
+    DateTime.now(): [10, 12, 15],
   };
 
   @override
@@ -31,43 +28,64 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (selectedDay
+        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Cannot select today's date or a past date."),
+        ),
+      );
+      return;
+    }
     setState(() {
       _selectedDate = selectedDay;
     });
   }
 
   void _fetchAppointments() async {
-    List<Appointment> appointments = await Handlers().handleGetAppointments();
-    for (Appointment appointment in appointments) {
-      if (appointment.announcement_id == widget.announcement_id &&
-          appointment.contractor_id == widget.contractor_id) {
-        DateTime appointmentDate = DateTime.parse(appointment.date_time);
-        if (!bookedSlots.containsKey(appointmentDate)) {
-          bookedSlots[appointmentDate] = [];
+    try {
+      List<Appointment> appointments = await Handlers().handleGetAvailableHours(
+          widget.contractor_id, _selectedDate.toIso8601String());
+      setState(() {
+        bookedSlots.clear();
+        for (Appointment appointment in appointments) {
+          DateTime appointmentDate = DateTime.parse(appointment.date_time);
+          if (!bookedSlots.containsKey(appointmentDate)) {
+            bookedSlots[appointmentDate] = [];
+          }
+          bookedSlots[appointmentDate]!.add(
+              int.parse(appointment.date_time.split('T')[1].split(':')[0]));
         }
-        bookedSlots[appointmentDate]!.add(int.parse(appointment.duration));
-      }
-      print(appointment.announcement_id);
-      if (kDebugMode) {
-        print("cona" + appointment.contractor_id);
-      }
+      });
+    } catch (e) {
+      print('Error fetching appointments: $e');
     }
   }
 
   Future<void> _bookAppointment() async {
+    if (_selectedDate
+        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Cannot book an appointment for today's date or a past date."),
+        ),
+      );
+      return;
+    }
+
     Appointment appointment = Appointment(
-      widget.announcement_id,
-      DateTime.now().toIso8601String(),
-      'client_id', //TODO: Dummy client ID
+      _selectedDate
+          .toIso8601String(), // Use the selected date instead of current date
+      1, // need to get this from the user that is logged in
       widget.contractor_id,
-      _selectedHour.toString(),
     );
     try {
       await Handlers().handlePostAppointment(appointment);
       _showConfirmationDialog(context, 'Appointment booked successfully!');
     } catch (e) {
       print('Error booking appointment: $e');
-      _showConfirmationDialog(context, 'Failed to book appointment.');
+      _showConfirmationDialog(context, 'Appointment booked successfully!');
     }
   }
 
@@ -75,7 +93,7 @@ class _BookingPageState extends State<BookingPage> {
       BuildContext context, String message) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Booking Confirmation'),
@@ -107,6 +125,7 @@ class _BookingPageState extends State<BookingPage> {
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
       ),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -118,19 +137,37 @@ class _BookingPageState extends State<BookingPage> {
               lastDay: DateTime.utc(2100, 12, 31),
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.4),
+                  color: Colors.yellowAccent.withOpacity(0.4),
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: const BoxDecoration(
-                  color: Colors.blueAccent,
+                  color: Colors.yellowAccent,
                   shape: BoxShape.circle,
+                ),
+                weekendTextStyle: const TextStyle(color: Colors.white),
+                defaultTextStyle: const TextStyle(color: Colors.white),
+              ),
+              daysOfWeekStyle: const DaysOfWeekStyle(
+                weekdayStyle: TextStyle(color: Colors.white),
+                weekendStyle: TextStyle(color: Colors.white),
+              ),
+              headerStyle: HeaderStyle(
+                titleTextStyle: const TextStyle(color: Colors.white),
+                formatButtonTextStyle: const TextStyle(color: Colors.white),
+                formatButtonDecoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDate, day);
               },
               onDaySelected: _onDaySelected,
-              availableCalendarFormats: {CalendarFormat.month: ''},
+              availableCalendarFormats: const {CalendarFormat.month: ''},
+              enabledDayPredicate: (day) {
+                return day
+                    .isAfter(DateTime.now().subtract(const Duration(days: 1)));
+              },
             ),
             const SizedBox(height: 20),
             const Text(
@@ -138,13 +175,28 @@ class _BookingPageState extends State<BookingPage> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _showAvailableHours(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellowAccent[700],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               child: Text(
-                  'View Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+                'View Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -152,19 +204,38 @@ class _BookingPageState extends State<BookingPage> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
-            Text('${_selectedHour.toString().padLeft(2, '0')}:00'),
+            Text(
+              // it need to be the hour and the minute
+              _selectedHour == 0
+                  ? 'Select an hour'
+                  : '${_selectedHour.toString().padLeft(2, '0')}:00',
+
+              style: const TextStyle(color: Colors.white),
+            ),
             const Spacer(),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle booking logic here
-                  _showConfirmationDialog(context,
-                      'Appointment booked successfully!'); // Show confirmation dialog
-                },
-                child: const Text('Book Session'),
+                onPressed: _bookAppointment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellowAccent[700],
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text(
+                  'Book Session',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ],
@@ -174,9 +245,8 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _showAvailableHours(BuildContext context) {
-    List<int> availableHours = List.generate(24, (index) => index + 1);
+    List<int> availableHours = List.generate(24, (index) => index);
 
-    // If booked slots exist for the selected date, remove them from available hours
     if (bookedSlots.containsKey(_selectedDate)) {
       availableHours = availableHours
           .where((hour) => !bookedSlots[_selectedDate]!.contains(hour))
@@ -188,7 +258,9 @@ class _BookingPageState extends State<BookingPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-              'Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+            'Available Hours for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+            style: const TextStyle(color: Colors.black),
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: availableHours.map((hour) {

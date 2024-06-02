@@ -10,11 +10,13 @@ class Announcement {
   final String category;
   final String description;
   final Coordinate coordinates;
+  final String name;
   Announcement({
     required this.id,
     required this.userId,
     required this.category,
     required this.description,
     required this.coordinates,
+    required this.name,
   });
 }

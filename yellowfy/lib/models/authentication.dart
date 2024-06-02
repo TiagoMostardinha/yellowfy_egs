@@ -5,7 +5,6 @@ class Authentication {
   final String password;
   final bool looking_for_work;
   final String mobile_number;
-  final String google_token;
 
   Authentication(
     this.id,
@@ -14,6 +13,5 @@ class Authentication {
     this.name,
     this.looking_for_work,
     this.mobile_number,
-    this.google_token,
   );
 }

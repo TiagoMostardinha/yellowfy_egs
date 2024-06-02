@@ -1,104 +1,172 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:yellowfy/createAnnouncementPage.dart';
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
+
   @override
-  State<ProfilePage> createState() => ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class ProfilePageState extends State<ProfilePage> {
-  final storage = FlutterSecureStorage();
-  String _fname = "";
-  String _job = ""; // Assuming you will retrieve the user's job as well
-  String _phoneNumber =
-      ""; // Assuming you will retrieve the user's phone number
-  bool _isLoading = true; // Indicates whether data is being loaded or not
+class _ProfilePageState extends State<ProfilePage> {
+  final _storage = FlutterSecureStorage();
+
+  String _id = "";
+  String _name = "";
+  String _email = "";
+  String _phone = "";
 
   @override
   void initState() {
     super.initState();
-    // Fetch user data here
-    fetchUserData();
+    _fetchData();
   }
 
-  Future<void> fetchUserData() async {
-    // Simulating data fetching from storage or API
-    // Replace this with actual data fetching logic
-    await Future.delayed(Duration(seconds: 2));
+  Future<void> _fetchData() async {
+    debugPrint("Fetching user data...");
+    final String tokenKey = "access_token";
+    final String? token = await _storage.read(key: tokenKey);
 
-    setState(() {
-      // Update _fname, _job, and _phoneNumber with fetched data
-      _fname = "Guilherme Claro"; // Example data
-      _job = ""; // Example data
-      _phoneNumber = "964377079"; // Example data
-      _isLoading = false; // Data loading is complete
-    });
+    if (token != null) {
+      final String url = 'http://grupo6-egs-deti.ua.pt/auth/userinfo';
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+      final response = await http.get(Uri.parse(url), headers: headers);
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        setState(() {
+          _id = responseJson['id'].toString();
+          _name = responseJson['name'];
+          _email = responseJson['email'];
+          _phone = responseJson['mobile_number'];
+        });
+        debugPrint("ID: $_id");
+        debugPrint("Name: $_name");
+        debugPrint("Email: $_email");
+        debugPrint("Phone: $_phone");
+        debugPrint("User data fetched successfully");
+      } else {
+        debugPrint("Failed to fetch user data: ${response.statusCode}");
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'YellowProfile',
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: 'Montserrat',
-            fontSize: 24,
+        title: const Text('Yellow Profile'),
+        backgroundColor: Colors.yellowAccent[700],
+        centerTitle: true,
+      ),
+      backgroundColor: Colors.black, // Set the background color of the Scaffold
+      body: Container(
+        color: Colors.black, // Ensure the Container has a black background
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 50.0,
+                  backgroundImage: AssetImage('assets/images.jpg'),
+                  backgroundColor: Colors.transparent,
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  color: Colors.grey[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _buildProfileInfo('Name', _name),
+                        _buildProfileInfo('Email', _email),
+                        _buildProfileInfo('Phone', _phone),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateAnnouncementPage(
+                          userId: _id,
+                          userName: _name,
+                          phone : _phone
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellowAccent[700],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    'Create Announcement',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.yellowAccent[700],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(), // Loading indicator
-            )
-          : Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundImage: AssetImage('assets/images.jpg'),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      _fname,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      _job,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      _phoneNumber,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    );
+  }
+
+  Widget _buildProfileInfo(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.white,
             ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              softWrap: false,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

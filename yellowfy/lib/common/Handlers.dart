@@ -12,23 +12,88 @@ class Handlers {
   Future<List<Announcement>> handleGetAnnouncements() async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v1/"));
+    final response = await http.get(Uri.parse("http://$url/announcements/v1"));
     if (response.statusCode == 200) {
       List<Announcement> announcements = [];
       var data = jsonDecode(response.body);
-      print(data);
+      if (data == null) return announcements;
       for (var i in data) {
         var id = i['Id'] ?? '';
         var userId = i['userID'] ?? '';
         var category = i['category'] ?? '';
         var description = i['description'] ?? '';
-        var latitude = (i['location']['lat'] ?? '') ?? 0.0;
-        var longitude = ((i['location']['long'] ?? '') ?? 0.0);
+        var name = i['name'] ?? '';
+        var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
+        var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
 
         announcements.add(Announcement(
           id: id,
           userId: userId,
           category: category,
+          description: description,
+          name: name,
+          coordinates: Coordinate(
+            latitude: latitude,
+            longitude: longitude,
+          ),
+        ));
+      }
+      return announcements;
+    } else {
+      throw Exception('Failed to load announcements: ${response.statusCode}');
+    }
+  }
+
+  Future<Announcement> handleGetAnnouncementsByUserId(String userId) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
+    final response =
+        await http.get(Uri.parse("http://$url/announcements/v1/$userId"));
+    if (response.statusCode == 200) {
+      Announcement announcement;
+      var data = jsonDecode(response.body);
+
+      announcement = Announcement(
+        id: data['Id'] ?? '',
+        userId: data['userID'] ?? '',
+        category: data['category'] ?? '',
+        description: data['description'] ?? '',
+        name: data['name'] ?? '',
+        coordinates: Coordinate(
+          latitude: double.tryParse(data['latitude'] ?? '') ?? 0.0,
+          longitude: double.tryParse(data['longitude'] ?? '') ?? 0.0,
+        ),
+      );
+      return announcement;
+    } else {
+      throw Exception('Failed to load announcements: ${response.statusCode}');
+    }
+  }
+
+  Future<List<Announcement>> handleGetAnnouncementsByGPS(
+      double radius, double lat, double long) async {
+    String url = dotenv.get("URL", fallback: "");
+    String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
+    final response = await http.get(Uri.parse(
+        "http://$url/announcements/v1/?radius=$radius&lat=$lat&long=$long"));
+    if (response.statusCode == 200) {
+      List<Announcement> announcements = [];
+      var data = jsonDecode(response.body);
+      if (data == null) return announcements;
+      for (var i in data) {
+        var id = i['Id'] ?? '';
+        var userId = i['userID'] ?? '';
+        var category = i['category'] ?? '';
+        var name = i['name'] ?? '';
+        var description = i['description'] ?? '';
+        var latitude = ((i['location']['lat'].toDouble()) ?? '') ?? 0.0;
+        var longitude = (((i['location']['long'].toDouble()) ?? '') ?? 0.0);
+
+        announcements.add(Announcement(
+          id: id,
+          userId: userId,
+          category: category,
+          name: name,
           description: description,
           coordinates: Coordinate(
             latitude: latitude,
@@ -42,44 +107,20 @@ class Handlers {
     }
   }
 
-  Future<Announcement> handleGetAnnouncementsById(String id) async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
-    final response = await http.get(Uri.parse("http://$url:$port/v1/$id"));
-    if (response.statusCode == 200) {
-      Announcement announcement;
-      var data = jsonDecode(response.body);
-
-      announcement = Announcement(
-        id: data['Id'] ?? '',
-        userId: data['userID'] ?? '',
-        category: data['category'] ?? '',
-        description: data['description'] ?? '',
-        coordinates: Coordinate(
-          latitude: double.tryParse(data['latitude'] ?? '') ?? 0.0,
-          longitude: double.tryParse(data['longitude'] ?? '') ?? 0.0,
-        ),
-      );
-      return announcement;
-    } else {
-      throw Exception('Failed to load announcements: ${response.statusCode}');
-    }
-  }
-
   Future<void> handlePostAnnouncement(Announcement announcement) async {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_ANNOUNCEMENTS", fallback: "");
     final response = await http.post(
-      Uri.parse("http://$url:$port/v1/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      Uri.parse("http://$url/announcements/v1/"),
       body: jsonEncode(<String, dynamic>{
         'userID': announcement.userId,
+        'name': announcement.name,
         'category': announcement.category,
         'description': announcement.description,
-        'latitude': announcement.coordinates.latitude,
-        'longitude': announcement.coordinates.longitude,
+        'location': {
+          'lat': announcement.coordinates.latitude,
+          'long': announcement.coordinates.longitude,
+        }
       }),
     );
     if (response.statusCode != 201) {
@@ -90,52 +131,44 @@ class Handlers {
   /*
   * Appointements
   */
-  Future<List<Appointment>> handleGetAppointments() async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
-    final response =
-        await http.get(Uri.parse("http://$url:$port/appointments/"));
-    if (response.statusCode == 200) {
-      List<Appointment> appointments = [];
-      var data = jsonDecode(response.body);
-      print(data);
-      for (var i in data) {
-        appointments.add(Appointment(
-          i['announcement_id'] ?? '',
-          i['date_time'] ?? '',
-          i['client_id'] ?? '',
-          i['contractor_id'] ?? '',
-          i['duration'] ?? '',
-        ));
-      }
-      return appointments;
-    } else {
-      throw Exception('Failed to load appointments: ${response.statusCode}');
-    }
-  }
 
   // get appointments by contractor id
 
-  Future<Appointment> handleGetPostByCID(String id) async {
+  Future<List<Appointment>> handleGetAvailableHours(
+      int contractor_id, String date_time) async {
     String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
-    final response =
-        await http.get(Uri.parse("http://$url:$port/appointments/$id"));
+    final response = await http.get(Uri.parse(
+        "http://$url/booking/appointments/available_hours/$contractor_id/$date_time"));
     if (response.statusCode == 200) {
-      Appointment appointment;
-
       var data = jsonDecode(response.body);
 
-      appointment = Appointment(
-        data['announcement_id'] ?? '',
-        data['date_time'] ?? '',
-        data['client_id'] ?? '',
-        data['contractor_id'] ?? '',
-        data['duration'] ?? '',
-      );
-      return appointment;
+      // Check if data is empty
+      if (data == null || data.isEmpty) {
+        return []; // Return an empty list if no appointments are available
+      }
+
+      // Assuming the response is a list of appointments
+      List<Appointment> appointments = (data as List)
+          .map((item) => Appointment(
+                item['date_time'] ?? '',
+                item['client_id'] ?? '',
+                item['contractor_id'] ?? '',
+              ))
+          .toList();
+
+      return appointments;
     } else {
-      throw Exception('Failed to load appointments: ${response.statusCode}');
+      // Log error details for debugging
+      print('Failed to load available hours: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // Handle different status codes
+      if (response.statusCode == 500) {
+        throw Exception('Server error. Please try again later.');
+      } else {
+        throw Exception(
+            'Failed to load available hours: ${response.statusCode}');
+      }
     }
   }
 
@@ -143,70 +176,15 @@ class Handlers {
     String url = dotenv.get("URL", fallback: "");
     String port = dotenv.get("PORT_APPOITMENTS", fallback: "");
     final response = await http.post(
-      Uri.parse("http://$url:$port/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      Uri.parse("http://$url/booking/appointments/"),
       body: jsonEncode(<String, dynamic>{
-        'announcement_id': appointment.announcement_id,
         'date_time': appointment.date_time,
         'client_id': appointment.client_id,
         'contractor_id': appointment.contractor_id,
-        'duration': appointment.duration,
       }),
     );
     if (response.statusCode != 201) {
       throw Exception('Failed to post appointment: ${response.statusCode}');
-    }
-  }
-
-  /*
-  * Authentication
-  */
-
-  Future<Authentication> handleGetAuthentication() async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
-
-    final response = await http.get(Uri.parse("http://$url:$port/login/"));
-
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-
-      return Authentication(
-        data['id'] ?? '',
-        data['name'] ?? '',
-        data['email'] ?? '',
-        data['password'] ?? '',
-        data['looking_for_work'] ?? '',
-        data['mobile_number'] ?? '',
-        data['google_token'] ?? '',
-      );
-    } else {
-      throw Exception(
-          'Failed to load authentication for user : ${response.statusCode}');
-    }
-  }
-
-  Future<void> handlePostAuthentication(Authentication authentication) async {
-    String url = dotenv.get("URL", fallback: "");
-    String port = dotenv.get("PORT_AUTHENTICATION", fallback: "");
-    final response = await http.post(
-      Uri.parse("http://$url:$port/"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'name': authentication.name,
-        'email': authentication.email,
-        'password': authentication.password,
-        'looking_for_work': authentication.looking_for_work,
-        'mobile_number': authentication.mobile_number,
-        'google_token': authentication.google_token,
-      }),
-    );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to post authentication: ${response.statusCode}');
     }
   }
 }

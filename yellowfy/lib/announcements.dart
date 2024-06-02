@@ -5,9 +5,20 @@ import 'package:yellowfy/contactspage.dart';
 import 'package:yellowfy/common/Handlers.dart';
 import 'package:yellowfy/models/announcements.dart';
 import 'package:yellowfy/profile_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AnnouncementsPage extends StatelessWidget {
-  const AnnouncementsPage({super.key});
+  AnnouncementsPage({super.key});
+
+  final _storage = FlutterSecureStorage();
+
+  Future<void> _getToken() async {
+    String? accessToken = await _storage.read(key: 'access_token');
+    String? refreshToken = await _storage.read(key: 'refresh_token');
+
+    debugPrint("Access Token -> $accessToken");
+    debugPrint("Refresh Token -> $refreshToken");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,31 +27,8 @@ class AnnouncementsPage extends StatelessWidget {
         title: const Text('Announcements'),
         backgroundColor: Colors.yellowAccent[700],
         centerTitle: true,
-        // add a button to create a new announcement
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // Navigate to the announcement creation page
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateAnnouncementPage(),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter),
-            onPressed: () {
-              // i need to filtr the announcements by job
-              
-
-              // Navigate to the announcement creation page
-            },
-          )
-        ],
       ),
+      backgroundColor: Colors.black, // Set the background color of the Scaffold
       body: FutureBuilder<List<Announcement>>(
         future: Handlers().handleGetAnnouncements(),
         builder: (context, snapshot) {
@@ -50,19 +38,25 @@ class AnnouncementsPage extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             List<Announcement>? announcements = snapshot.data;
+
+            if (announcements == null || announcements.isEmpty) {
+              return const Center(
+                  child: Text('No announcements found',
+                      style: TextStyle(color: Colors.yellowAccent)));
+            }
             return ListView.builder(
               scrollDirection: Axis.vertical,
               itemCount: announcements!.length,
               itemBuilder: (context, index) {
                 return _buildAnnouncementCard(
-                  name: announcements[index].userId,
+                  name: announcements[index].name,
+                  // i need to convert userId to a int
+                  userID: int.parse(announcements[index].userId),
                   job: announcements[index].category,
                   imagePath: 'assets/images.jpg',
                   contactInfo: announcements[index].description,
-                  coordinates: "" +
-                      announcements[index].coordinates.latitude.toString() +
-                      " " +
-                      announcements[index].coordinates.longitude.toString(),
+                  coordinates:
+                      '${announcements[index].coordinates.latitude}, ${announcements[index].coordinates.longitude}',
                   description: announcements[index].description,
                   id: announcements[index].id,
                   context: context,
@@ -89,7 +83,6 @@ class AnnouncementsPage extends StatelessWidget {
           ),
         ],
         onTap: (index) {
-          // Handle bottom navigation bar taps here
           if (index == 0) {
             Navigator.push(
               context,
@@ -98,8 +91,7 @@ class AnnouncementsPage extends StatelessWidget {
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AnnouncementsPage()),
+              MaterialPageRoute(builder: (context) => AnnouncementsPage()),
             );
           } else if (index == 2) {
             Navigator.push(
@@ -115,6 +107,7 @@ class AnnouncementsPage extends StatelessWidget {
   Widget _buildAnnouncementCard({
     required String name,
     required String job,
+    required int userID,
     required String imagePath,
     required String contactInfo,
     required String coordinates,
@@ -129,6 +122,7 @@ class AnnouncementsPage extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ContactInfoPage(
                 contactInfo: contactInfo,
+                userID: userID,
                 name: name,
                 job: job,
                 announcement_id: id,
@@ -144,7 +138,7 @@ class AnnouncementsPage extends StatelessWidget {
           height: 225, // Adjust card height as needed
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.grey[200],
+            color: Colors.grey[900], // Updated to match dark theme
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,13 +167,14 @@ class AnnouncementsPage extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        color: Colors.white, // Updated text color
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       job,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.grey[400], // Updated text color
                       ),
                     ),
                   ],
@@ -192,14 +187,14 @@ class AnnouncementsPage extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.location_on,
-                      color: Colors.grey[600],
+                      color: Colors.grey[400], // Updated icon color
                       size: 16,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       coordinates,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.grey[400], // Updated text color
                       ),
                     ),
                   ],

@@ -65,12 +65,7 @@ flutter {
 }
 android {                                                                                     
    defaultConfig {                                                                             
-     minSdkVersion 23     
-     manifestPlaceholders =  [
-         appAuthRedirectScheme: 'com.example.yellowfy',
-         applicationName: "com.example.yellowfy.Application"
-     ]                                                              
+     minSdkVersion flutter.minSdkVersion                                                                          
    }                                                                                           
  }   
- 
 dependencies {}
